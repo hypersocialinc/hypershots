@@ -40,8 +40,12 @@ DONE=()
 report_progress() {
   rc=$?
   if [ $rc -ne 0 ]; then
-    echo "grade-set stopped: ${#DONE[@]}/$TOTAL panels styled (${DONE[*]:-none})" >&2
-    echo "styled outputs already written are kept — re-run grade-set.sh to resume (styled files are simply overwritten)" >&2
+    if [ ${#DONE[@]} -gt 0 ]; then
+      echo "grade-set stopped: ${#DONE[@]}/$TOTAL panels styled (${DONE[*]})" >&2
+      echo "styled outputs already written are kept — re-run grade-set.sh to resume (styled files are simply overwritten)" >&2
+    else
+      echo "grade-set stopped: 0/$TOTAL panels styled — nothing was written" >&2
+    fi
   fi
 }
 trap report_progress EXIT
