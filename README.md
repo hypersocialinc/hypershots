@@ -50,6 +50,9 @@ agent> bash <skill>/scripts/validate.sh .shots iphone-6.9 en
        PASS panel-4.png 1290x2796 alpha:no profile:ok
        PASS panel-5.png 1290x2796 alpha:no profile:ok
        VALIDATED: 5 panels, 1290x2796, store-compliant
+
+agent> node <skill>/scripts/make-review.mjs .shots
+       # opens an App Store-style review page — give feedback by panel number
 ```
 
 The rendered PNGs in `out/` upload to App Store Connect as-is.

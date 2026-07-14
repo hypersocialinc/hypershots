@@ -172,4 +172,19 @@ echo "$out12" | grep -q "VALIDATED: 1 panels" || { echo "T12 FAILED: styled alte
 rm "$WS/out/iphone-6.9/en/panel-1.styled.png" "$WS/out/iphone-6.9/en/panel-1.styled.boxes.json"
 echo "styled alternate validated without occupying a store slot OK"
 
+echo "== T13: review page (make-review.mjs) =="
+node skills/hypershots/scripts/translate-inject.mjs "$WS" es
+bash "$R" "$WS" iphone-6.9 es
+cp "$WS/out/iphone-6.9/en/panel-1.png" "$WS/out/iphone-6.9/en/panel-1.styled.png"
+node skills/hypershots/scripts/make-review.mjs "$WS" iphone-6.9 en es
+review="$WS/out/iphone-6.9/review.html"
+[ -s "$review" ] || { echo "T13 FAILED: review.html not written"; exit 1; }
+grep -q 'en/panel-1.png' "$review" || { echo "T13 FAILED: en panel missing from review"; exit 1; }
+grep -q 'es/panel-1.png' "$review" || { echo "T13 FAILED: es panel missing from review"; exit 1; }
+grep -q 'visible before' "$review" || { echo "T13 FAILED: fold-line label missing"; exit 1; }
+grep -q 'styled-toggle' "$review" || { echo "T13 FAILED: styled toggle missing despite panel-1.styled.png"; exit 1; }
+rm "$review" "$WS/out/iphone-6.9/en/panel-1.styled.png"
+rm -rf "$WS/panels-es" "$WS/out/iphone-6.9/es"
+echo "review page (both locales, fold label, styled toggle) OK"
+
 echo "ALL TESTS PASSED"

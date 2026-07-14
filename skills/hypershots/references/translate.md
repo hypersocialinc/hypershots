@@ -25,7 +25,7 @@ Localize an existing set: text swap + re-render, not a re-design. Contracts and 
    ```
    Any locale other than `en` renders from `panels-<locale>/`; output goes to `out/<profile>/<locale>/`.
 5. **Read each localized PNG.** Auto-fit handles length (longer German headline shrinks until the copy block clears the device). You check what fit can't: bad line breaks, one-word orphan lines, awkward hyphenless wraps, a `<br>` now splitting mid-phrase. Fix the string, re-inject, re-render.
-6. **Validate + contact sheet** as in create.md steps 8–9.
+6. **Validate + review page** as in create.md steps 8–9 — re-run `make-review.mjs` after rendering a new locale so its tab appears.
 
 ## Injection contract (enforced fatally by the script)
 

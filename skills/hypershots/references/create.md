@@ -166,10 +166,18 @@ bash <skill>/scripts/validate.sh <ws> [profile=iphone-6.9] [locale=en]
 
 Checks: exact dims for the profile; ≤10 panels; no alpha (flattens in place if ImageMagick present, otherwise FAILs with install instructions); ICC untagged-or-sRGB; and **every PNG must have a clean `.boxes.json` sibling** — a PNG without one was not produced by a clean render and fails. Run after every render; a set that hasn't passed is not deliverable.
 
-## 9. Contact sheet
+## 9. Review page + contact sheet
+
+```bash
+node <skill>/scripts/make-review.mjs <ws> iphone-6.9    # locales default to all rendered
+```
+
+Writes `out/<profile>/review.html` — an App Store-style gallery strip (locale tabs, fold line after panel 3, headline captions, clean/styled toggle). Open it / show it to the user for sign-off; feedback arrives by panel number. If your runtime can publish an HTML artifact (e.g. Claude Code's Artifact tool), publish a copy with images downscaled to ~600px and inlined as data URIs (artifact sandboxes block local file paths); otherwise the local file is the review surface.
+
+The contact sheet remains the quick-share secondary artifact:
 
 ```bash
 cd <ws> && magick montage out/<profile>/<locale>/panel-*.png -tile 5x1 -geometry +8+8 contact-sheet.png
 ```
 
-Adjust `-tile Nx1` to the panel count. Show it to the user for sign-off.
+Adjust `-tile Nx1` to the panel count.

@@ -16,11 +16,11 @@ Change an existing set — headline tweak, sticker move, theme fix. The cheapest
    ```bash
    bash <skill>/scripts/validate.sh <ws> <profile> <locale>
    ```
-5. Regenerate the contact sheet and show the user:
+5. Regenerate the review page and show the user:
    ```bash
-   cd <ws> && magick montage out/<profile>/<locale>/panel-*.png -tile 5x1 -geometry +8+8 contact-sheet.png
+   node <skill>/scripts/make-review.mjs <ws> <profile>
    ```
-   (`-tile Nx1` = panel count; same command as create.md step 9.)
+   (Contact sheet via `magick montage` stays available as the quick-share artifact — create.md step 9.)
 
 ## Rules
 

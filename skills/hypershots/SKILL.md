@@ -54,7 +54,7 @@ Runs in the **user's repo** — the installed skill dir is read-only reference, 
 ## The loop that makes output good — mandatory
 
 ```
-render.sh → Read every rendered PNG yourself → fix → re-render → validate.sh → contact sheet → show the user
+render.sh → Read every rendered PNG yourself → fix → re-render → validate.sh → review page (make-review.mjs) + contact sheet → show the user
 ```
 
 Read each PNG and check: copy overflow or awkward breaks, clipped/overlapping stickers, `.di`/`.statusbar` double-island, legibility (ink-on-paper contrast, accent not vibrating), stretched/mis-cropped capture. **Never skip the Read** — the validator checks specs, not taste; only your eyes catch a clipped sticker.
