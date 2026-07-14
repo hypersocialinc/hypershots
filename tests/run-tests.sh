@@ -4,7 +4,7 @@ cd "$(dirname "$0")/.."
 R=skills/hypershots/scripts/render.sh
 V=skills/hypershots/scripts/validate.sh
 WS=tests/fixture
-rm -rf "$WS/out" "$WS/profile.css" "$WS"/t11-*
+rm -rf "$WS/out" "$WS/profile.css" "$WS"/t11-* "$WS"/t14-*
 
 echo "== T1: render at iphone-6.9 =="
 bash "$R" "$WS" iphone-6.9 en
@@ -186,5 +186,52 @@ grep -q 'styled-toggle' "$review" || { echo "T13 FAILED: styled toggle missing d
 rm "$review" "$WS/out/iphone-6.9/en/panel-1.styled.png"
 rm -rf "$WS/panels-es" "$WS/out/iphone-6.9/es"
 echo "review page (both locales, fold label, styled toggle) OK"
+
+echo "== T14: grade-set.sh degrades before any upload; edit-pass 6-arg contract intact =="
+GS=skills/hypershots/scripts/grade-set.sh
+EP=skills/hypershots/scripts/edit-pass.sh
+# (a) PATH stripped of every dir that ships genmedia — grade-set must fail on
+# its genmedia preflight, before a single upload/paid call could happen
+CLEAN_PATH=""
+IFS=':' read -ra t14_dirs <<< "$PATH"
+for d in "${t14_dirs[@]}"; do
+  [ -n "$d" ] && [ -x "$d/genmedia" ] && continue
+  CLEAN_PATH="${CLEAN_PATH:+$CLEAN_PATH:}$d"
+done
+if PATH="$CLEAN_PATH" command -v genmedia >/dev/null 2>&1; then
+  echo "T14 setup FAILED: genmedia still reachable on stripped PATH"; exit 1
+fi
+PATH="$CLEAN_PATH" command -v node >/dev/null 2>&1 || { echo "T14 setup FAILED: node lost from stripped PATH"; exit 1; }
+rc=0; PATH="$CLEAN_PATH" bash "$GS" "$WS" iphone-6.9 en "test style" protected 2>"$WS/t14-err.txt" || rc=$?
+[ "$rc" -ne 0 ] || { echo "T14 FAILED: grade-set succeeded without genmedia"; exit 1; }
+grep -q "genmedia" "$WS/t14-err.txt" || { echo "T14 FAILED: failure is not the genmedia error:"; cat "$WS/t14-err.txt"; exit 1; }
+if compgen -G "$WS/out/iphone-6.9/en/panel-*.styled.png" > /dev/null; then
+  echo "T14 FAILED: styled output created despite missing genmedia"; exit 1
+fi
+echo "grade-set correctly refused without genmedia, no styled output OK"
+# (b) 7th-arg support must not break 6-arg calls: a bogus workspace has to hit
+# the "not rendered" check, not an argument-parsing error
+rc=0; bash "$EP" "$WS-nonexistent" iphone-6.9 en panel-1 "test style" protected 2>"$WS/t14-err.txt" || rc=$?
+[ "$rc" -ne 0 ] || { echo "T14 FAILED: edit-pass accepted a bogus workspace"; exit 1; }
+grep -q "not rendered" "$WS/t14-err.txt" || { echo "T14 FAILED: 6-arg edit-pass call broke — expected 'not rendered', got:"; cat "$WS/t14-err.txt"; exit 1; }
+rm "$WS/t14-err.txt"
+echo "edit-pass 6-arg call unchanged (fails on 'not rendered', not args) OK"
+# (c) full-canvas protection guard: the fixture's protect boxes cover the whole
+# canvas after padding (see T11b), so a protected edit is a guaranteed paid
+# no-op — edit-pass must refuse AFTER building the mask but BEFORE any genmedia
+# upload. Stub genmedia proves no invocation happened.
+if command -v magick >/dev/null 2>&1; then
+  mkdir -p "$WS/t14-bin"
+  printf '#!/bin/sh\ntouch "%s"\necho "T14c: genmedia was invoked" >&2\nexit 99\n' "$WS/t14-genmedia-invoked" > "$WS/t14-bin/genmedia"
+  chmod +x "$WS/t14-bin/genmedia"
+  rc=0; PATH="$(cd "$WS/t14-bin" && pwd):$PATH" bash "$EP" "$WS" iphone-6.9 en panel-1 "test style" protected 2>"$WS/t14-err.txt" || rc=$?
+  [ "$rc" -ne 0 ] || { echo "T14c FAILED: edit-pass accepted a fully-protected canvas"; exit 1; }
+  grep -q "no editable pixels" "$WS/t14-err.txt" || { echo "T14c FAILED: expected the no-editable-pixels error, got:"; cat "$WS/t14-err.txt"; exit 1; }
+  [ ! -e "$WS/t14-genmedia-invoked" ] || { echo "T14c FAILED: genmedia was invoked before the coverage guard"; exit 1; }
+  rm -rf "$WS/t14-bin" "$WS/t14-err.txt" "$WS/t14-genmedia-invoked"
+  echo "fully-protected canvas refused before any upload OK"
+else
+  echo "SKIP T14c: imagemagick not installed (coverage guard unexercised)"
+fi
 
 echo "ALL TESTS PASSED"

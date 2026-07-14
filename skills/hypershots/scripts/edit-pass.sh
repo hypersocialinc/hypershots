@@ -2,16 +2,20 @@
 # Optional style grade: GPT Image 2 edit over a finished render, with the
 # protected regions re-composited from the original (see references/edit-filter.md).
 # Usage:
-#   edit-pass.sh <workspace> <profile> <locale> <panel-N> "<style prompt>" [protected|full]
+#   edit-pass.sh <workspace> <profile> <locale> <panel-N> "<style prompt>" [protected|full] [style-ref]
+# style-ref: optional reference image (local file or http(s) URL) the grade
+# should match — used by grade-set.sh to anchor a whole set to one look.
 set -euo pipefail
-WS="${1:?usage: edit-pass.sh <workspace> <profile> <locale> <panel-N> \"<style prompt>\" [protected|full]}"
-PROFILE="$2"; LOCALE="$3"; PANEL="$4"; STYLE="$5"; MODE="${6:-protected}"
+WS="${1:?usage: edit-pass.sh <workspace> <profile> <locale> <panel-N> \"<style prompt>\" [protected|full] [style-ref]}"
+PROFILE="$2"; LOCALE="$3"; PANEL="$4"; STYLE="$5"; MODE="${6:-protected}"; STYLE_REF="${7:-}"
 KIT="$(cd "$(dirname "$0")/.." && pwd)"
 OUT="$WS/out/$PROFILE/$LOCALE"; SRC="$OUT/$PANEL.png"; BOX="$OUT/$PANEL.boxes.json"
 
 [ -f "$SRC" ] || { echo "ERROR: $SRC not rendered" >&2; exit 1; }
 [ -f "$BOX" ] || { echo "ERROR: $BOX missing — re-render first" >&2; exit 1; }
 case "$MODE" in protected|full) ;; *) echo "ERROR: mode must be 'protected' or 'full', got '$MODE'" >&2; exit 1 ;; esac
+case "$STYLE_REF" in ""|http://*|https://*) ;; *)
+  [ -f "$STYLE_REF" ] || { echo "ERROR: style ref '$STYLE_REF' is neither a file nor an http(s) URL" >&2; exit 1; } ;; esac
 command -v genmedia >/dev/null || { echo "ERROR: style grade needs genmedia (see SKILL.md prerequisites)" >&2; exit 1; }
 command -v magick   >/dev/null || { echo "ERROR: style grade needs ImageMagick (ImageMagick 7 'magick' binary required)" >&2; exit 1; }
 
@@ -51,15 +55,36 @@ STYLED="$OUT/$PANEL.styled.png"
 # fail here, before a single byte (or cent) goes to the API
 if [ "$MODE" = "protected" ]; then
   node "$KIT/scripts/make-mask.mjs" "$BOX" "$OW" "$OH" "$SCALE" "$MASK" "$FEATHER"
+  # inverse of the zero-boxes bug: if the padded protect union covers the WHOLE
+  # canvas there is nothing to edit — the composite would restore every pixel,
+  # so the API call is a guaranteed paid no-op (verified live: the model returns
+  # blank paper for an all-opaque mask). Fail before a byte (or cent) is spent.
+  if [ "$(magick identify -format '%[opaque]' "$MASK")" = "True" ]; then
+    echo "ERROR: protected mask has no editable pixels — the [data-protect] boxes (+ shadow pad) cover the entire canvas, so a protected grade would change nothing. Use 'full' mode on a text-light panel, or restyle theme.css and re-render (see references/edit-filter.md)." >&2
+    exit 1
+  fi
 fi
 
 echo "uploading $SRC ..."
 SRC_URL="$(guard genmedia upload "$SRC" --json | json_field cdn_url)"
 
+# optional style anchor: panel goes FIRST in image_urls (the image being
+# edited — the mask applies to it), the reference is appended after it
+IMAGE_URLS="[\"$SRC_URL\"]"
+if [ -n "$STYLE_REF" ]; then
+  case "$STYLE_REF" in
+    http://*|https://*) REF_URL="$STYLE_REF" ;;
+    *) echo "uploading style ref $STYLE_REF ..."
+       REF_URL="$(guard genmedia upload "$STYLE_REF" --json | json_field cdn_url)" ;;
+  esac
+  IMAGE_URLS="[\"$SRC_URL\",\"$REF_URL\"]"
+  STYLE="$STYLE Match the grading style, palette and texture of the reference image exactly."
+fi
+
 # image_urls is array<string> and image_size an ImageSize object — genmedia
 # passes flag values through verbatim, so hand it JSON literals
 RUN_ARGS=(openai/gpt-image-2/edit
-  --image_urls "[\"$SRC_URL\"]"
+  --image_urls "$IMAGE_URLS"
   --prompt "$STYLE"
   --image_size "{\"width\":$EW,\"height\":$EH}"
   --quality high

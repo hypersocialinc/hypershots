@@ -63,7 +63,7 @@ The rendered PNGs in `out/` upload to App Store Connect as-is.
 |---|---|
 | Device frame geometry (Dynamic Island, bezels, screen aspect) | Cutout sticker assets: GPT Image 2 → BiRefNet v2 background removal → transparent PNG |
 | Vendored fonts (`@font-face`, no network race) | Photographic backgrounds |
-| Exact store canvas from per-profile CSS variables | Optional whole-panel style grade (GPT Image 2 edit) |
+| Exact store canvas from per-profile CSS variables | Optional whole-panel style grade (GPT Image 2 edit, set-consistent via a style anchor) |
 | Per-locale copy with `data-i18n` markers + auto-fit | Protected mode: frame and text regions are masked, then **re-composited from the clean render** — AI never ships your typography |
 | `validate.sh`: dimensions, alpha, ICC profile, panel count | |
 

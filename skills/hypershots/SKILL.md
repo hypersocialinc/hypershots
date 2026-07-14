@@ -18,7 +18,7 @@ Use for: App Store screenshot sets, localizing an existing set, revising panels,
 | New screenshot set | `references/create.md` | scaffold → brief → theme → author → render → self-review → validate |
 | Tweak headline/sticker/theme | `references/revise.md` | edit → re-render → re-validate |
 | Localize an existing set | `references/translate.md` + `references/i18n.md` | extract keys → strings.<locale>.json → inject → render → validate |
-| Stylized/graded look | `references/edit-filter.md` | `edit-pass.sh` per panel (needs genmedia + ImageMagick) |
+| Stylized/graded look | `references/edit-filter.md` | `edit-pass.sh` per panel, `grade-set.sh` for a set-consistent pass (needs genmedia + ImageMagick) |
 | Generated stickers/backgrounds | `references/asset-recipes.md` | pinned genmedia recipes + degraded mode |
 | Apple size/spec question | `references/store-specs.md` | canvas table, asset rules |
 | Something looks wrong | `references/gotchas.md` | symptom → cause → fix |
