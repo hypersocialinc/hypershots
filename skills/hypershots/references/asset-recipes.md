@@ -42,6 +42,23 @@ genmedia run fal-ai/flux/schnell --prompt "<scene>" \
   --image_size portrait_16_9 --download ./assets/<name>.png --json
 ```
 
+## Brand-mark stickers (real logos — never generate trademarks)
+
+Image generation mangles trademark shapes — a "close enough" ChatGPT knot or Claude starburst reads as fake instantly. Download the real SVG instead (no genmedia needed):
+
+```bash
+curl -sL "https://cdn.simpleicons.org/claude"       -o assets/icon-claude.svg
+curl -sL "https://cdn.simpleicons.org/claude/white" -o assets/icon-claude-white.svg
+# some brands are delisted (openai 404s) — fallback: Wikimedia Commons, e.g.
+curl -sL "https://upload.wikimedia.org/wikipedia/commons/0/04/ChatGPT_logo.svg" -o assets/icon-openai.svg
+```
+
+**Verify every download** — a CDN 404 writes a 0-byte (or HTML-error) file that renders as an invisible sticker: `ls -la assets/icon-*.svg` and `file assets/icon-*.svg` must show non-empty SVG. Once vendored locally the marks are offline-deterministic, same as the fonts.
+
+Presentation that shipped: ~66px rounded-square tiles, 3px `var(--paper-hi)` ring + drop shadow, straddling the device bezel, opposite rotations per tile.
+
+**Legal:** only marks whose use is truthful — a real, shipping integration. App Review checks third-party trademark use (see the caution in `examples/spotless/panels/panel-5.html`).
+
 ## Picking different models
 
 ```bash

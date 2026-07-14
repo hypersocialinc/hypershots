@@ -20,6 +20,7 @@ Use for: App Store screenshot sets, localizing an existing set, revising panels,
 | Localize an existing set | `references/translate.md` + `references/i18n.md` | extract keys → strings.<locale>.json → inject → render → validate |
 | Stylized/graded look | `references/edit-filter.md` | `edit-pass.sh` per panel, `grade-set.sh` for a set-consistent pass (needs genmedia + ImageMagick) |
 | Generated stickers/backgrounds | `references/asset-recipes.md` | pinned genmedia recipes + degraded mode |
+| Need captures / mid-gesture frames | `references/capture-recipes.md` | simctl status-bar/appearance/burst recipes |
 | Apple size/spec question | `references/store-specs.md` | canvas table, asset rules |
 | Something looks wrong | `references/gotchas.md` | symptom → cause → fix |
 
@@ -35,7 +36,7 @@ Always exits 0 — it's a report, not a gate. `chrome` and `node` are **REQUIRED
 
 The part every agent must hold even without reading `create.md`:
 
-- IMMUTABLE: `.panel`/`.device`/`.screen` geometry — sized by profile CSS variables (`--panel-w`/`--panel-h`). Never hardcode panel px, never restyle `.device`. Screen aspect is ~0.460 (w/h).
+- Geometry classes are IMMUTABLE (`.panel` `.stage` `.device` `.screen` `.di` `.statusbar`) — sized by profile CSS variables (`--panel-w`/`--panel-h`). Never hardcode panel px, never restyle `.device`. Screen aspect is ~0.460 (w/h). Type classes (`.headline` `.sub` `.eyebrow`) MAY be restyled in theme.css — that's the brand layer's job (fit.js measures actual boxes, so size/weight changes are safe).
 - `.stage` is the required absolute layer (`inset:0`) holding the device AND the stickers as siblings — omit it and the device loses its positioning context (wrong but validating).
 - NEVER add `.di`/`.statusbar` over a real simulator capture (`<img class="shot">` already contains its own status bar + island) — double-DI bug.
 - REQUIRED markers on every panel: `data-i18n="pN.key"` (double-quoted, one line, text + `<br>` only — no other nested markup) on every translatable node; `data-fit` on the headline/sub block; `data-protect="name"` on `.wrap` and `.device`.

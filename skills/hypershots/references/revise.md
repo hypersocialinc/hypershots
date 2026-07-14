@@ -22,6 +22,8 @@ Change an existing set — headline tweak, sticker move, theme fix. The cheapest
    ```
    (Contact sheet via `magick montage` stays available as the quick-share artifact — create.md step 9.)
 
+Regenerate the review page/contact sheet and show it for sign-off after **every** revise pass, not just the last — the founder-feedback loop is the productive one.
+
 ## Rules
 
 - **Never edit `out/`** — generated; render purges it.

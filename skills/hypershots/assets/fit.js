@@ -1,7 +1,10 @@
 /* HyperShots fit + boxes dump. Include LAST in every panel:
    <script src="fit.js"></script>
    Contract: [data-fit] on shrinkable copy blocks (optional data-fit-floor, px);
-   [data-protect="name"] on regions the style-edit must preserve. */
+   [data-protect="name"] on regions the style-edit must preserve.
+   Dump shape: { panelW, panelH, fitFailures, boxes, shots } — boxes are the
+   [data-protect] regions (mask input), shots are the .shot capture regions
+   (coordinate reference only, never masked). */
 (async () => {
   await document.fonts.ready;
   const root = document.documentElement;
@@ -36,9 +39,39 @@
     return { name: el.dataset.protect || el.className,
              x: r.x, y: r.y, w: r.width, h: r.height };
   });
+  // capture-region boxes, dumped under a SEPARATE key: make-mask.mjs consumes
+  // `boxes` wholesale, and a .shot region must never join the protect mask.
+  const shots = [...document.querySelectorAll('.shot')].map(el => {
+    const r = el.getBoundingClientRect();
+    return { name: 'shot', x: r.x, y: r.y, w: r.width, h: r.height };
+  });
+  // debug grid: render.sh --grid sets --hs-grid:1 in the generated profile.css.
+  // 50px CSS-space lines + labeled coordinates every 100px, drawn over the
+  // panel (z-index 90, no layout impact — absolute + pointer-events:none).
+  if (cs.getPropertyValue('--hs-grid').trim() === '1') {
+    const grid = document.createElement('div');
+    grid.style.cssText = 'position:absolute;left:0;top:0;width:' + panelW + 'px;height:' + panelH +
+      'px;z-index:90;pointer-events:none;background:' +
+      'repeating-linear-gradient(to right,rgba(255,0,128,.55) 0 1px,transparent 1px 50px),' +
+      'repeating-linear-gradient(to bottom,rgba(255,0,128,.55) 0 1px,transparent 1px 50px)';
+    for (let y = 0; y <= panelH; y += 100) {
+      for (let x = 0; x <= panelW; x += 100) {
+        const t = document.createElement('div');
+        // labels near the right edge anchor left of their line so they don't clip
+        const anchor = x + 46 > panelW
+          ? 'right:' + (panelW - x + 2) + 'px' : 'left:' + (x + 2) + 'px';
+        t.style.cssText = 'position:absolute;' + anchor + ';top:' + (y + 1) +
+          'px;font:9px ui-monospace,Menlo,monospace;color:#ff0080;' +
+          'background:rgba(255,255,255,.75);padding:0 2px;line-height:11px';
+        t.textContent = x + ',' + y;
+        grid.appendChild(t);
+      }
+    }
+    (document.querySelector('.panel') || document.body).appendChild(grid);
+  }
   const dump = document.createElement('script');
   dump.type = 'application/json';
   dump.id = 'hypershots-boxes';
-  dump.textContent = JSON.stringify({ panelW, panelH, fitFailures: failures, boxes });
+  dump.textContent = JSON.stringify({ panelW, panelH, fitFailures: failures, boxes, shots });
   document.body.appendChild(dump);
 })();

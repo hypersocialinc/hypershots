@@ -3,9 +3,12 @@
    workspace theme.css. Panel dims come from the per-profile profile.css that
    render.sh generates: --panel-w / --panel-h.
 
-   IMMUTABLE (agents must not restyle): .panel dims, .device geometry, .screen
-   aspect, .di, .statusbar positions. VARIABLE: everything visual via theme
-   tokens, plus sticker placement via inline left/top/width/transform. */
+   IMMUTABLE geometry (agents must not restyle): .panel dims, .stage, .device
+   geometry, .screen aspect, .di, .statusbar positions. TYPE classes
+   (.headline, .sub, .eyebrow) MAY be restyled in theme.css — that's the brand
+   layer's job (fit.js measures actual boxes, so size/weight changes are safe).
+   Everything else visual via theme tokens, plus sticker placement via inline
+   left/top/width/transform. */
 
 :root{
   --panel-w:430px; --panel-h:932px;      /* fallback = iphone-6.9 default; overridden by profile.css */
@@ -69,3 +72,17 @@
 .gradeBadge{position:absolute;z-index:20;width:88px;height:88px;border-radius:22px;
   background:var(--badge-bg,#e7efe8);border:3px solid var(--paper-hi,#fff);box-shadow:0 14px 26px -8px rgba(0,0,0,.42);
   display:flex;align-items:center;justify-content:center;color:var(--badge-ink,#2d5a3d);font-weight:800;font-size:52px}
+/* Pop card — a piece of the in-screen UI lifted out of the device as a
+   floating rotated card. Position/rotate via inline style like the other
+   stickers. Width defaults wider than the device so it breaks the bezel on
+   both sides — that's what reads as "lifted off" rather than "part of the
+   screenshot". MUST fully cover the source region it duplicates (rotation
+   shifts corners: ±2° over a 390px card ≈ 8px — pad generously and check
+   all four corners in the rendered PNG). Alternate rotation sign across
+   panels so the set doesn't feel stamped from one template. */
+.popCard{position:absolute;z-index:20;left:20px;width:calc(var(--panel-w) - 40px);
+  background:var(--paper-hi,#fff);border-radius:16px;padding:17px 20px 22px;
+  border-left:4px solid var(--accent,#444);
+  box-shadow:0 26px 48px -16px rgba(0,0,0,.5),0 4px 12px rgba(0,0,0,.12)}
+.popCard .tag{font-family:var(--font-mono,ui-monospace,monospace);font-weight:600;font-size:10px;
+  letter-spacing:2px;text-transform:uppercase;color:var(--accent,#444);margin-bottom:7px}

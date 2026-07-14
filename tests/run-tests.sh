@@ -234,4 +234,26 @@ else
   echo "SKIP T14c: imagemagick not installed (coverage guard unexercised)"
 fi
 
+echo "== T15: boxes dump carries shots; --grid render is quarantined =="
+# (a) every clean render's boxes.json must carry a shots array (capture-region
+# coordinates; empty here — the fixture screen is hand-built)
+node -e "
+  const j=require('./$WS/out/iphone-6.9/en/panel-1.boxes.json');
+  if(!Array.isArray(j.shots))throw new Error('boxes.json missing shots array');
+  console.log('shots key present ('+j.shots.length+' entries) OK')"
+# (b) --grid outputs land in <locale>-grid, warn loudly, and differ from clean
+before15="$(shasum "$WS/out/iphone-6.9/en/panel-1.png")"
+out15="$(bash "$R" "$WS" iphone-6.9 en --grid)"
+echo "$out15" | grep -q "GRID RENDER — not for upload" || { echo "T15 FAILED: grid warning not printed"; exit 1; }
+gp="$WS/out/iphone-6.9/en-grid/panel-1.png"
+[ -s "$gp" ] || { echo "T15 FAILED: grid render did not land in en-grid/"; exit 1; }
+[ "$(shasum "$WS/out/iphone-6.9/en/panel-1.png")" = "$before15" ] || { echo "T15 FAILED: --grid render touched the normal en/ output"; exit 1; }
+if cmp -s "$WS/out/iphone-6.9/en/panel-1.png" "$gp"; then
+  echo "T15 FAILED: grid PNG identical to clean render — overlay not drawn"; exit 1
+fi
+# (c) validate on the normal dir still passes — the grid dir is invisible to it
+bash "$V" "$WS" iphone-6.9 en
+rm -rf "$WS/out/iphone-6.9/en-grid"
+echo "shots dump + quarantined grid render OK"
+
 echo "ALL TESTS PASSED"

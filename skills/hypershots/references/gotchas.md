@@ -38,6 +38,23 @@ Failure modes this pipeline was hardened against. Symptom → cause → fix. If 
 **Cause:** capture aspect doesn't match the screen's ~0.460 w/h and something overrode `.shot`.
 **Fix:** use `<img class="shot">` as-is: `object-fit:cover; object-position:top center` top-anchor cover-crops mismatched captures (bottom pixels lost, nothing distorted). Prefer captures at ~0.460 aspect (e.g. 1206×2622).
 
+## Overlay lands in the wrong place over a capture
+
+**Symptom:** a `.popCard`/sticker meant to sit over a specific piece of in-screen UI misses it — offset, too small, or covering the wrong row.
+**Cause:** three coordinate spaces in play, and a feature was measured in the wrong one:
+
+1. **CSS px** — what you author in panel HTML (430×932 for iphone-6.9). Inline `left/top/width` are CSS px.
+2. **Rendered px** — the output PNG (1290×2796): `css_px = rendered_px / scale`, scale from `profiles.json` (3 for the iPhone profiles).
+3. **Displayed px** — whatever size an image viewer/Read tool showed the PNG at. A feature measured in a *displayed* image must first be rescaled to rendered px (multiply by rendered/displayed), THEN divided by scale.
+
+**Fix:** convert through rendered px, never straight from a displayed image. Fastest path: re-render with `render.sh <ws> <profile> <locale> --grid` — a labeled 50px CSS-space grid over every panel (outputs quarantined in `out/<profile>/<locale>-grid/`, never for upload) — and read coordinates off it. `panel-N.boxes.json` also carries the `.shot` capture region under its `shots` key (CSS px), so the capture's on-panel origin and size are exact.
+
+## Reserved class names
+
+**Symptom:** panel renders as one giant colored bar / elements stacked at panel origin → per-panel class collides with a frame.css class.
+**Cause:** a per-panel `<style>` defines a class frame.css already owns; the frame's absolute positioning is inherited silently and the panel still validates cleanly.
+**Fix:** never reuse these for per-panel styles: `.panel .wrap .eyebrow .headline .sub .stage .device .screen .shot .di .statusbar .sticker .emoji .cutout .chip .pin .gradeBadge .popCard`. The generic-sounding ones (`.stage`, `.chip`, `.sub`) are the traps. Pick app-prefixed names for in-screen markup instead.
+
 ## Render exit codes
 
 **1** generic (Chrome/panels/profile problems — check the kept `panel-N.chrome.log`), **2** fit failure (rewrite the copy, not the floor), **3** profile.css not linked. Full table: create.md, render step.

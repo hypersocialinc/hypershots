@@ -45,6 +45,8 @@ Ask the user in ONE message, mirroring the scaffolded `brief.md` fields:
 
 Write the answers into `<ws>/brief.md`. It persists across create → revise → translate runs.
 
+Taking the captures yourself (marketing-clean status bar, light/dark appearance, mid-gesture frames)? → `capture-recipes.md`.
+
 ## 4. Theme
 
 Derive `<ws>/theme.css` from the app's **real brand** — sample colors from the actual captures in `assets/`, check the app's icon/site. **Never ship the scaffold's placeholder values unchanged.**
@@ -70,10 +72,14 @@ Write `<ws>/panels/panel-1.html` … `panel-N.html`. Bespoke HTML per app — th
 <link rel="stylesheet" href="../frame.css">
 <link rel="stylesheet" href="../theme.css">
 <link rel="stylesheet" href="../profile.css">
-<style>/* per-panel styles for in-screen content go here — never restyle frame classes */</style>
+<style>/* per-panel styles for in-screen content go here — geometry classes are
+   immutable; type classes may be restyled in theme.css, not here (see Frame
+   contract below); never reuse frame.css class names (see gotchas.md) */</style>
 </head><body>
 <div class="panel">
   <div class="wrap" data-protect="copy">
+    <!-- eyebrow is OPTIONAL — decoration at thumbnail size; drop it if the
+         headline works harder without it -->
     <div class="eyebrow"><b data-i18n="p1.eyebrow">Check before you go</b><i></i></div>
     <div class="headline" data-fit data-i18n="p1.headline">How clean is your<br>favorite restaurant?</div>
     <div class="sub" data-i18n="p1.sub">You might not want to know.</div>
@@ -102,16 +108,17 @@ Structure notes:
 - `.wrap` is the copy block above the device (z-index 2). `.stage` is the absolute-positioned layer (`inset:0`, z-index 1) that holds the device AND the stickers — omit it and the device loses its positioning context, producing a wrong-but-validating panel. Stickers live in `.stage` as siblings of `.device`, not inside `.screen`.
 - An annotated example set ships in `examples/spotless/` — if absent in your copy of the skill, the contract in this file is complete on its own.
 
-**Frame contract** (frame.css is the geometric contract — do not restyle it):
+**Frame contract** (frame.css is the geometric contract):
 
-- IMMUTABLE: `.panel` dims, `.device` geometry, `.screen` aspect, `.di` / `.statusbar` positions. Profile variables (`--panel-w`/`--panel-h`) size everything; anchors are ratios of panel size, so the same panel renders at any near-aspect iPhone profile.
+- Geometry classes are IMMUTABLE: `.panel` `.stage` `.device` `.screen` `.di` `.statusbar`. Profile variables (`--panel-w`/`--panel-h`) size everything; anchors are ratios of panel size, so the same panel renders at any near-aspect iPhone profile. Type classes (`.headline` `.sub` `.eyebrow`) MAY be restyled in `theme.css` — that's the brand layer's job (fit.js measures actual boxes, so size/weight changes are safe).
+- Never reuse a frame.css class name for a per-panel style — a collision inherits absolute positioning silently and validates cleanly. Reserved list + symptom: gotchas.md, "Reserved class names".
 - Real simulator captures go in `<img class="shot" src="../assets/capture.png">` inside `.screen`. They already contain the device's own status bar and island — **never add `.di`/`.statusbar` over a real capture** (double-Dynamic-Island bug). Use `.di` + `.statusbar` only on hand-built screens.
 - Screen aspect is ~0.460 (w/h). Captures should match; `.shot` top-anchor cover-crops (`object-fit:cover; object-position:top center`) so slightly-taller captures lose bottom pixels, not get stretched.
 
 **Marker rules** (create-time discipline that makes translate and style-edit mechanical later — full contract in `i18n.md`):
 
 - `data-i18n="pN.key"` on EVERY translatable text node. **Double quotes only** — the injector's regex matches double-quoted attributes. Content on one line: text + `<br>` only; the injector fatally rejects any other nested markup inside a marked element. Wrap styled fragments in their own marked elements instead.
-- `data-fit` on the headline (optionally `data-fit-floor="px"`, default floor 26; `data-fit-max="px"` to override the budget). Fit shrinks the element 1px at a time until it **and all its following siblings** clear the device top (budget = device-top − 14px) — shrinking the headline pulls `.sub` up out of the device zone too. Floor breach = fit failure = render exit 2.
+- `data-fit` on the headline (optionally `data-fit-floor="px"`, default floor 26; `data-fit-max="px"` to override the budget). Fit shrinks the element 1px at a time until it **and all its following siblings** clear the device top (budget = device-top − 14px) — shrinking the headline pulls `.sub` up out of the device zone too. Any extra element you add to `.wrap` consumes fit budget and the headline shrinks to pay for it. Floor breach = fit failure = render exit 2.
 - `data-protect="name"` on `.wrap` (e.g. `"copy"`) and `.device` (e.g. `"device"`). Render dumps their on-screen boxes to `boxes.json`; the style-edit builds its protection mask from them. Zero `data-protect` elements = nothing to protect later. Author them from panel one.
 
 **Determinism contract:** panels must not depend on time, randomness, or animations. render.sh does two Chrome passes per panel — screenshot, then DOM dump — and they must agree; anything nondeterministic makes the boxes lie about the pixels.
@@ -123,8 +130,16 @@ Structure notes:
 - `.pin` — map-pin callout with tail
 - `.gradeBadge` — square letter-grade badge
 - `.emoji` — plain emoji glyph with drop shadow (zero-dependency sticker)
+- `.popCard` — a piece of the in-screen UI lifted out of the device as a rotated floating card (defaults wider than the device so it breaks the bezel on both sides). Two composition rules: it MUST fully cover the source region it duplicates (rotation shifts corners — check all four in the rendered PNG), and alternate the rotation sign across panels so the set doesn't feel stamped from one template.
 
 Negative left/right offsets that bleed off the panel edge are fine — `.panel` clips. Sticker drop shadows extend beyond their boxes; the style-edit mask pads for it.
+
+**Copy contract** (field-learned — these four rules survived a shipped set):
+
+- **Outcome in the headline, mechanism in the sub.** "Find your perfect NYC apartment" / "With an AI agent that hunts every listing site for you" — the headline sells what the user gets; the differentiator is the sub's job.
+- **Eyebrows are optional.** At thumbnail size they're decoration; store visitors read headline-first. Drop the eyebrow when the headline works harder without it.
+- **Headlines are exactly 2 lines, authored with `<br>`; subs exactly 1 line.** A 3-line headline or an orphan-word sub reads broken at store size — the fix is REWORDING, not resizing. Glyph width matters more than character count: "Track every home" (16 chars) overflowed where "Find your perfect" (17 chars) fit.
+- **Type scale:** kit defaults are headline 45px/800, sub 19.5px/500; field sessions landed at ~47px/900 and ~23px/600. Restyling type classes in `theme.css` is sanctioned (see Frame contract above). Beyond ~50px/900 a typical two-word line force-wraps at 430px.
 
 **Narrative arc** (from the shipped Spotless set): shock/hook → map/core value → trust/data-source → share/delight → bonus. The FIRST 3 panels are all most visitors see (see `store-specs.md`) — they carry the install decision. Lead with the emotional hook, not the feature list.
 
@@ -134,9 +149,11 @@ Negative left/right offsets that bleed off the panel edge are fine — `.panel` 
 bash <skill>/scripts/render.sh <ws> [profile=iphone-6.9] [locale=en]
 ```
 
-What it does: resolves the profile → writes `<ws>/profile.css` (generated, do not edit/commit) → purges `out/<profile>/<locale>/panel-*` → for each panel runs Chrome twice (screenshot at exact device-scale canvas; DOM dump to extract fit results + protect boxes) → writes `panel-N.png` + `panel-N.boxes.json`.
+What it does: resolves the profile → writes `<ws>/profile.css` (generated, do not edit/commit) → purges `out/<profile>/<locale>/panel-*` → for each panel runs Chrome twice (screenshot at exact device-scale canvas; DOM dump to extract fit results + protect boxes + `.shot` capture boxes) → writes `panel-N.png` + `panel-N.boxes.json`.
 
 Chrome discovery: `$CHROME` env override → macOS app path → `google-chrome`/`chromium`/`chromium-browser` on PATH. Each Chrome call has a 180s watchdog.
+
+Debug: append `--grid` to render a labeled 50px CSS-space coordinate grid over every panel — the fastest way to place overlays over a capture (see gotchas.md, "Overlay lands in the wrong place"). Grid renders land in `out/<profile>/<locale>-grid/` so validate.sh never sees them; they are never for upload.
 
 Exit codes:
 
@@ -177,7 +194,7 @@ Writes `out/<profile>/review.html` — an App Store-style gallery strip (locale 
 The contact sheet remains the quick-share secondary artifact:
 
 ```bash
-cd <ws> && magick montage out/<profile>/<locale>/panel-*.png -tile 5x1 -geometry +8+8 contact-sheet.png
+magick montage <ws>/out/<profile>/<locale>/panel-*.png -tile 5x1 -geometry +8+8 <ws>/contact-sheet.png
 ```
 
-Adjust `-tile Nx1` to the panel count.
+Adjust `-tile Nx1` to the panel count. Paths are workspace-explicit so the command works from any cwd.
