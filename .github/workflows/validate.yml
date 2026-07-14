@@ -1,0 +1,22 @@
+name: validate
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  skills:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20 }
+      - run: npm ci
+      - run: npm run validate
+  render:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: browser-actions/setup-chrome@v1
+      # ubuntu-latest's `apt-get install imagemagick` only gets IM6 (convert/identify,
+      # no `magick` binary) — our scripts need IM7's `magick`. This installs IM7.
+      - uses: mfinelli/setup-imagemagick@v8
+      - run: CHROME="$(which chrome)" bash tests/run-tests.sh

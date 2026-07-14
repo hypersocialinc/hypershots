@@ -1,0 +1,24 @@
+{
+  "locale": "es",
+  "strings": {
+    "p1.eyebrow": "Revísalo antes de ir",
+    "p1.headline": "¿Está limpio tu<br>restaurante favorito?",
+    "p1.sub": "Quizás no quieras saberlo.",
+    "p2.eyebrow": "Todos los restaurantes cerca",
+    "p2.headline": "Cada lugar,<br>calificado en el mapa",
+    "p2.sub": "Verde es limpio. Rojo son ratas.",
+    "p3.eyebrow": "Directo de la fuente",
+    "p3.headline": "Inspecciones reales,<br>no reseñas",
+    "p3.sub": "Calificaciones oficiales. Plagas registradas.",
+    "p4.eyebrow": "Spotless Wrapped",
+    "p4.headline": "Califica los lugares<br>donde más comes",
+    "p4.sub": "Comparte tu recibo de limpieza.",
+    "p5.eyebrow": "También en tu asistente IA",
+    "p5.headline": "Pregúntale a<br>ChatGPT o Claude",
+    "p5.sub": "Spotless responde en tu chat.",
+    "p5.chat-q": "¿Gramercy Tavern está limpio?",
+    "p5.chat-a": "Esto encontró Spotless:",
+    "p5.chat-para": "Gramercy Tavern obtuvo la máxima nota en seis inspecciones recientes y está en el nivel más limpio de la ciudad.",
+    "p5.foot": "✦ Funciona en ChatGPT y Claude"
+  }
+}

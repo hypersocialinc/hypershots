@@ -1,0 +1,4 @@
+{ "locale": "es", "strings": {
+  "p1.eyebrow": "Prueba",
+  "p1.headline": "Un titular de prueba deliberadamente largo que no cabe a cuarenta y cinco píxeles",
+  "p1.sub": "El ajuste automático debe encoger la línea." } }

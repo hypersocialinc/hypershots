@@ -1,0 +1,43 @@
+/* Spotless theme — the BRAND layer of the set submitted to the App Store
+   with Spotless v1.0 (July 2026). Everything visual lives here;
+   geometry stays in the kit's frame.css and is consumed via var().
+
+   Palette rationale: warm paper + near-black ink reads "printed health
+   report", the rust accent is the app icon color, and the semantic
+   scale (green→teal→amber→red) mirrors the app's cleanliness tiers. */
+
+:root{
+  /* ---- the 10 tokens frame.css requires ---- */
+  --paper:#F4ECE0;        /* warm paper — panel + screen background */
+  --paper-hi:#FBF6EC;     /* raised card / chip surface, sticker borders */
+  --ink:#161413;          /* primary text */
+  --mid:#76695C;          /* secondary text */
+  --rule:rgba(22,20,19,.16);
+  --accent:#C44322;       /* brand rust (eyebrow, highlights) */
+  --badge-bg:#E7EFE8;     /* gradeBadge surface (letter-grade sticker) */
+  --badge-ink:#2D5A3D;    /* gradeBadge glyph — inspection-grade green */
+  --font-sans:'Inter Tight',system-ui,-apple-system,'Helvetica Neue',sans-serif;
+  --font-mono:'IBM Plex Mono',ui-monospace,Menlo,monospace;
+
+  /* ---- extra Spotless tokens the per-panel styles consume ----
+     (original names kept so the ported panel styles keep working) */
+  --ink-soft:#2E2925;     /* long-form quote text */
+  --mid-2:#57493C;        /* .sub in the shipped set ran slightly darker than --mid */
+  --accent-deep:#B0491F;  /* darker rust for small mono type on paper */
+  --green:#2D5A3D;        /* cleanest tier */
+  --teal:#2E9E8F;         /* high score map pin */
+  --amber:#A66B1E;        /* mid tier */
+  --red:#8B2426;          /* CONCERNING tier */
+  --red-soft:#ECD2D2;     /* warning banner fill */
+}
+
+/* Faint paper grain — brand texture, not geometry, so it lives in the theme.
+   SVG turbulence noise is deterministic (no randomness at render time) and
+   z-index 40 puts it above stickers (z-20) so everything shares the print. */
+.panel::after{
+  content:"";position:absolute;inset:0;pointer-events:none;z-index:40;opacity:.05;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+}
+
+/* The shipped .sub used the darker --mid-2 for a touch more contrast on paper. */
+.sub{color:var(--mid-2)}

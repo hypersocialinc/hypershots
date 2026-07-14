@@ -1,0 +1,4 @@
+interface:
+  display_name: HyperShots
+  short_description: Spec-reliable App Store screenshots from deterministic HTML + optional AI assets.
+  default_prompt: Create App Store screenshots for my app using the hypershots skill. Ask me the brief questionnaire first.

@@ -1,0 +1,34 @@
+<!doctype html><html><head><meta charset="utf-8">
+<!-- Assets not included — see README.md. Structure + annotations are the reference. -->
+<!-- PANEL 4 of 5 — SHARE / DELIGHT. Deliberately FRAMELESS: the receipt is a
+     shareable artifact the app exports, not an app screen, so wrapping it in
+     the phone bezel would lie about what it is. Skipping .stage/.device is
+     allowed — .panel dims still come from the profile variables, and the
+     one-off breaks the device rhythm right where the set needs a beat. -->
+<link rel="stylesheet" href="../fonts.css">
+<link rel="stylesheet" href="../frame.css">
+<link rel="stylesheet" href="../theme.css">
+<link rel="stylesheet" href="../profile.css">
+<style>
+  /* Slight -2.5° tilt + paper drop-shadow = a physical receipt dropped on the
+     panel. top:300 ≈ the shared device-top line so the copy block above stays
+     the same height as the framed panels. */
+  .receiptHero{position:absolute;left:50%;top:300px;transform:translateX(-50%) rotate(-2.5deg);
+    width:392px;z-index:2;
+    filter:drop-shadow(0 26px 40px rgba(22,20,19,.30)) drop-shadow(0 2px 4px rgba(22,20,19,.12))}
+  .receiptHero img{width:100%;height:auto;display:block}
+</style></head>
+<body>
+<div class="panel">
+  <div class="wrap" data-protect="copy">
+    <div class="eyebrow"><b data-i18n="p4.eyebrow">Spotless Wrapped</b><i></i></div>
+    <div class="headline" data-fit data-fit-floor="34" data-i18n="p4.headline">Rate the places<br>you eat most</div>
+    <div class="sub" data-i18n="p4.sub">Share your cleanliness receipt.</div>
+  </div>
+  <!-- No .device on this panel, so the artifact itself is the protected
+       region for the style-edit pass. The receipt's own text is baked into
+       the PNG (app-generated artifact) — nothing in it to mark for i18n. -->
+  <div class="receiptHero" data-protect="receipt"><img src="../assets/receipt.png" alt=""></div>
+</div>
+<script src="../fit.js"></script>
+</body></html>

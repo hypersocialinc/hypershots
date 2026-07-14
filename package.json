@@ -1,0 +1,12 @@
+{
+  "name": "hypershots-repo",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "validate": "node scripts/validate-skills.mjs",
+    "test": "bash tests/run-tests.sh"
+  },
+  "devDependencies": {
+    "gray-matter": "^4.0.3"
+  }
+}

@@ -1,0 +1,6 @@
+node_modules/
+.DS_Store
+*.log
+# rendered output inside example/test workspaces (contact sheets are committed explicitly)
+tests/fixture/out/
+tests/fixture/profile.css

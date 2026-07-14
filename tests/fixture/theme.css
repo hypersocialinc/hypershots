@@ -1,0 +1,4 @@
+:root{
+  --paper:#F0EEE8; --paper-hi:#FFFFFF; --ink:#1A1A1A; --mid:#666; --rule:rgba(0,0,0,.15);
+  --accent:#0A5AD4; --font-sans:'Inter Tight',system-ui,sans-serif; --font-mono:'IBM Plex Mono',monospace;
+}

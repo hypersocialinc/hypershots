@@ -1,0 +1,71 @@
+/* HyperShots frame kit — GEOMETRIC CONTRACT. Do not put brand styling here.
+   Theme tokens (--paper, --ink, --accent, fonts...) are defined per-app in the
+   workspace theme.css. Panel dims come from the per-profile profile.css that
+   render.sh generates: --panel-w / --panel-h.
+
+   IMMUTABLE (agents must not restyle): .panel dims, .device geometry, .screen
+   aspect, .di, .statusbar positions. VARIABLE: everything visual via theme
+   tokens, plus sticker placement via inline left/top/width/transform. */
+
+:root{
+  --panel-w:430px; --panel-h:932px;      /* fallback = iphone-6.9 default; overridden by profile.css */
+  --device-w-ratio:0.80;                 /* device width  / panel width  */
+  --device-top-ratio:0.330;              /* device top    / panel height */
+  --device-aspect:2.0906;                /* device height / width (715/342) */
+  --device-top:calc(var(--panel-h) * var(--device-top-ratio));
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-font-smoothing:antialiased;text-rendering:geometricPrecision}
+
+.panel{
+  position:relative;overflow:hidden;
+  width:var(--panel-w);height:var(--panel-h);
+  background:var(--paper,#f5f5f2);
+  font-family:var(--font-sans,system-ui,-apple-system,sans-serif);
+}
+
+/* ---- copy block above the device ---- */
+.wrap{position:relative;z-index:2;padding:42px 34px 0}
+.eyebrow{display:flex;align-items:center;gap:14px}
+.eyebrow b{font-family:var(--font-mono,ui-monospace,Menlo,monospace);font-weight:500;
+  font-size:12px;letter-spacing:2.4px;text-transform:uppercase;color:var(--accent,#444);white-space:nowrap}
+.eyebrow i{flex:1;height:1px;background:var(--rule,rgba(0,0,0,.16))}
+.headline{font-weight:800;font-size:45px;line-height:1.02;letter-spacing:-1.3px;color:var(--ink,#111);margin-top:16px}
+.sub{font-weight:500;font-size:19.5px;line-height:1.25;color:var(--mid,#555);margin-top:12px}
+
+/* ---- device: FIXED geometry, identical on every panel of a set ----
+   Screen aspect stays ~0.460 (matches a real 1206x2622 capture) at any
+   profile because height derives from width via --device-aspect. */
+.stage{position:absolute;inset:0;z-index:1}
+.device{position:absolute;left:50%;top:var(--device-top);transform:translateX(-50%);
+  width:calc(var(--panel-w) * var(--device-w-ratio));
+  height:calc(var(--panel-w) * var(--device-w-ratio) * var(--device-aspect));
+  background:#0a0a0c;border-radius:60px;padding:12px;
+  box-shadow:0 34px 70px -22px rgba(0,0,0,.5), 0 0 0 2px #000 inset, 0 1px 0 rgba(255,255,255,.08) inset}
+.screen{position:relative;width:100%;height:100%;border-radius:47px;overflow:hidden;background:var(--paper,#f5f5f2)}
+.shot{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:top center;display:block}
+
+/* Dynamic Island + status bar — ONLY for hand-built screens. Real simulator
+   captures already contain the device's own status bar + island: never stack
+   these over a real capture (classic double-DI bug). */
+.di{position:absolute;top:11px;left:50%;transform:translateX(-50%);width:100px;height:30px;
+  background:#050506;border-radius:16px;z-index:8}
+.statusbar{position:absolute;top:0;left:0;right:0;height:54px;z-index:7;color:var(--ink,#111);
+  display:flex;align-items:center;justify-content:space-between;padding:16px 30px 0}
+.statusbar .time{font-weight:600;font-size:16px;font-family:system-ui,-apple-system}
+.statusbar .icons{display:flex;gap:6px;align-items:center}
+.statusbar.light{color:#fff}
+
+/* ---- breakout sticker primitives (position/rotate via inline style) ---- */
+.sticker{position:absolute;z-index:20}
+.emoji{position:absolute;z-index:20;line-height:1;filter:drop-shadow(0 10px 12px rgba(0,0,0,.28))}
+.cutout{position:absolute;z-index:20;filter:drop-shadow(0 12px 16px rgba(0,0,0,.30))}
+.chip{position:absolute;z-index:20;background:var(--paper-hi,#fff);border-radius:20px;
+  padding:10px 16px;font-weight:800;box-shadow:0 12px 22px -8px rgba(0,0,0,.4);border:2px solid var(--paper-hi,#fff)}
+.chip small{font-weight:600;color:var(--mid,#555);font-size:.6em}
+.pin{position:absolute;z-index:20;color:#fff;font-weight:800;font-size:26px;
+  padding:8px 14px;border-radius:14px;box-shadow:0 12px 20px -6px rgba(0,0,0,.45);border:2px solid var(--paper-hi,#fff)}
+.pin::after{content:"";position:absolute;left:22px;bottom:-8px;width:16px;height:16px;
+  background:inherit;border-radius:3px;transform:rotate(45deg)}
+.gradeBadge{position:absolute;z-index:20;width:88px;height:88px;border-radius:22px;
+  background:var(--badge-bg,#e7efe8);border:3px solid var(--paper-hi,#fff);box-shadow:0 14px 26px -8px rgba(0,0,0,.42);
+  display:flex;align-items:center;justify-content:center;color:var(--badge-ink,#2d5a3d);font-weight:800;font-size:52px}

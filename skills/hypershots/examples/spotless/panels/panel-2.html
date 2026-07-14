@@ -1,0 +1,34 @@
+<!doctype html><html><head><meta charset="utf-8">
+<!-- Assets not included — see README.md. Structure + annotations are the reference. -->
+<!-- PANEL 2 of 5 — MAP / CORE VALUE. After the shock, show the product doing
+     its job. Still inside the first-3 window that carries the install. -->
+<link rel="stylesheet" href="../fonts.css">
+<link rel="stylesheet" href="../frame.css">
+<link rel="stylesheet" href="../theme.css">
+<link rel="stylesheet" href="../profile.css">
+</head>
+<body>
+<div class="panel">
+  <div class="wrap" data-protect="copy">
+    <div class="eyebrow"><b data-i18n="p2.eyebrow">Every restaurant nearby</b><i></i></div>
+    <div class="headline" data-fit data-fit-floor="34" data-i18n="p2.headline">Every spot,<br>graded on a map</div>
+    <div class="sub" data-i18n="p2.sub">Green is clean. Red means rats.</div>
+  </div>
+  <div class="stage">
+    <!-- Same fixed device slot as panels 1/3/5 — set consistency. -->
+    <div class="device" data-protect="device"><div class="screen">
+      <!-- REAL simulator capture (1206x2622, aspect 0.46 = the .screen aspect,
+           so nothing distorts). It already contains the device's own status
+           bar + Dynamic Island — NO .di / .statusbar here, or you get the
+           classic double-island bug. -->
+      <img class="shot" src="../assets/screen-map.png" alt="">
+    </div></div>
+    <!-- Score pins float over the bezel (z-20) at map-pin scale — they repeat
+         the sub's promise in color: teal 9.6 good, rust 5.5 bad. Alternating
+         sides, ±5–6° — same sticker rhythm as panel 1. -->
+    <div class="pin" style="left:8px;top:470px;background:var(--teal);transform:rotate(-6deg)">9.6</div>
+    <div class="pin" style="right:6px;top:610px;background:var(--accent);transform:rotate(5deg)">5.5</div>
+  </div>
+</div>
+<script src="../fit.js"></script>
+</body></html>

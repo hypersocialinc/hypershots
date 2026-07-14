@@ -1,0 +1,6 @@
+{
+  "iphone-6.9": { "css": [430, 932], "scale": 3, "out": [1290, 2796], "class": "iphone", "note": "default; the only REQUIRED iPhone size" },
+  "iphone-6.9-alt": { "css": [440, 956], "scale": 3, "out": [1320, 2868], "class": "iphone" },
+  "iphone-6.5": { "css": [428, 926], "scale": 3, "out": [1284, 2778], "class": "iphone", "note": "legacy slot, still accepted" },
+  "ipad-13": { "css": [1032, 1376], "scale": 2, "out": [2064, 2752], "class": "ipad", "note": "separate authoring pass — do not re-render iphone panels" }
+}
