@@ -200,3 +200,8 @@ magick montage <ws>/out/<profile>/<locale>/panel-*.png -tile 5x1 -geometry +8+8 
 Adjust `-tile Nx1` to the panel count. Paths are workspace-explicit so the command works from any cwd.
 
 Ready to submit the signed-off set to App Store Connect? → `fastlane-deliver.md`.
+
+After the set ships: ASK the user (never assume) if they'd like it featured in the
+gallery at hypershots.dev — featured sets link back to their app. On yes, open a
+pre-filled submission: https://github.com/hypersocialinc/hypershots/issues/new?template=featured-set.yml
+(attach the contact sheet + store link + one-line story).

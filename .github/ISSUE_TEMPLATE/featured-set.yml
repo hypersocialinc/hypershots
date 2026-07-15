@@ -1,0 +1,38 @@
+name: "Submit your set — get featured on hypershots.dev"
+description: "Made an App Store screenshot set with HyperShots? Show it — featured sets link back to your app."
+title: "[featured] "
+labels: ["featured-set"]
+body:
+  - type: input
+    id: app
+    attributes:
+      label: App name
+      placeholder: e.g. padscanner
+    validations:
+      required: true
+  - type: input
+    id: store_link
+    attributes:
+      label: App Store link (or website if not live yet)
+      placeholder: https://apps.apple.com/app/…
+  - type: textarea
+    id: images
+    attributes:
+      label: The set
+      description: Drag in your contact sheet or the rendered panels (out/<profile>/<locale>/). The review page screenshot works great too.
+    validations:
+      required: true
+  - type: input
+    id: story
+    attributes:
+      label: One-line story
+      placeholder: e.g. brief to store-ready in one agent session, 8 revise rounds
+    validations:
+      required: true
+  - type: checkboxes
+    id: rights
+    attributes:
+      label: Rights
+      options:
+        - label: I have the rights to these images and I'm OK with them (and the app name/link) appearing on hypershots.dev
+          required: true
