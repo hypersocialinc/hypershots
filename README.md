@@ -1,6 +1,8 @@
 # HyperShots
 
-**App Store screenshots that pass validation the first time, in every language — deterministic HTML where Apple has rules, generative AI where it sells.**
+**Beautiful App Store screenshots — perfect to spec, shipped end to end.** Deterministic HTML where Apple has rules, generative AI where it sells.
+
+**[hypershots.dev](https://hypershots.dev)**
 
 ![Five-panel Spotless screenshot set](docs/img/hero.png)
 
@@ -9,10 +11,10 @@
 ## Install
 
 ```bash
-npx skills add hypersocialinc/hypershots --skill hypershots --agent claude-code
+npx skills add hypersocialinc/hypershots
 ```
 
-For Codex, use `--agent codex` (the skill ships `agents/openai.yaml`).
+One command — it detects your agent (Claude Code, Codex & friends) and installs interactively. Non-interactive/CI form: add `--skill hypershots --agent claude-code` (or `--agent codex`; the skill ships `agents/openai.yaml`).
 
 ## Why not just generate the whole image?
 
