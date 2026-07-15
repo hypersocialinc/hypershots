@@ -22,6 +22,13 @@ body:
       description: Drag in your contact sheet or the rendered panels (out/<profile>/<locale>/). The review page screenshot works great too.
     validations:
       required: true
+  - type: textarea
+    id: icon
+    attributes:
+      label: App icon
+      description: Drag in your app icon (~512px PNG) — it appears on your set's gallery chip.
+    validations:
+      required: true
   - type: input
     id: story
     attributes:
