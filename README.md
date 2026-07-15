@@ -110,7 +110,7 @@ What no surveyed tool combines: a **hard validator** (dimensions, alpha, ICC, co
 That's upstream of HyperShots — use `fastlane snapshot` or your simulator tooling, then point the brief at the captures.
 
 **How do I upload the finished set?**
-`fastlane deliver`. HyperShots produces exactly the assets a deliver lane consumes (`out/<profile>/<locale>/panel-*.png`).
+`fastlane deliver` — and the skill ships the runbook: [`skills/hypershots/references/fastlane-deliver.md`](skills/hypershots/references/fastlane-deliver.md) (out/ → `fastlane/screenshots/` mapping, the working lane, the first-version gotchas). HyperShots produces exactly the assets a deliver lane consumes (`out/<profile>/<locale>/panel-*.png`).
 
 **Can I use it without any AI?**
 Yes. The deterministic half is standalone: bring your own PNGs or plain emoji instead of generated stickers, skip the style grade, and nothing ever needs a fal key.

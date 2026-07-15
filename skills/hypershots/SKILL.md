@@ -9,7 +9,7 @@ Deterministic where it must be (HTML/CSS: device frames, fonts, copy, exact canv
 
 ## When to use / when not
 
-Use for: App Store screenshot sets, localizing an existing set, revising panels, "make my screenshots cooler", Apple screenshot-spec questions. NOT for: general image generation, social/OG images, capturing simulator screenshots (→ fastlane snapshot), uploading to ASC (→ fastlane deliver).
+Use for: App Store screenshot sets, localizing an existing set, revising panels, "make my screenshots cooler", Apple screenshot-spec questions, submitting a finished set to ASC. NOT for: general image generation, social/OG images, capturing simulator screenshots (→ fastlane snapshot).
 
 ## Intent router
 
@@ -21,6 +21,7 @@ Use for: App Store screenshot sets, localizing an existing set, revising panels,
 | Stylized/graded look | `references/edit-filter.md` | `edit-pass.sh` per panel, `grade-set.sh` for a set-consistent pass (needs genmedia + ImageMagick) |
 | Generated stickers/backgrounds | `references/asset-recipes.md` | pinned genmedia recipes + degraded mode |
 | Need captures / mid-gesture frames | `references/capture-recipes.md` | simctl status-bar/appearance/burst recipes |
+| Submit the set to App Store Connect | `references/fastlane-deliver.md` | validate → copy `out/` → `fastlane/screenshots/<asc-locale>/` → deliver lane |
 | Apple size/spec question | `references/store-specs.md` | canvas table, asset rules |
 | Something looks wrong | `references/gotchas.md` | symptom → cause → fix |
 

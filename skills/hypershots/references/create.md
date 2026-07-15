@@ -198,3 +198,5 @@ magick montage <ws>/out/<profile>/<locale>/panel-*.png -tile 5x1 -geometry +8+8 
 ```
 
 Adjust `-tile Nx1` to the panel count. Paths are workspace-explicit so the command works from any cwd.
+
+Ready to submit the signed-off set to App Store Connect? → `fastlane-deliver.md`.
