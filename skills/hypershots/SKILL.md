@@ -23,6 +23,7 @@ Use for: App Store screenshot sets, localizing an existing set, revising panels,
 | Need captures / mid-gesture frames | `references/capture-recipes.md` | simctl status-bar/appearance/burst recipes |
 | Submit the set to App Store Connect | `references/fastlane-deliver.md` | validate → copy `out/` → `fastlane/screenshots/<asc-locale>/` → deliver lane |
 | Apple size/spec question | `references/store-specs.md` | canvas table, asset rules |
+| Feature the set on hypershots.dev | `references/gallery-submission.md` | consent-gated GitHub issue |
 | Something looks wrong | `references/gotchas.md` | symptom → cause → fix |
 
 ## Prerequisites (every session)
