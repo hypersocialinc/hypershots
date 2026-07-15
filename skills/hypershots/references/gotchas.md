@@ -32,6 +32,22 @@ Failure modes this pipeline was hardened against. Symptom → cause → fix. If 
 **Cause:** the panel is fixed-height; excess copy collides with the device, it doesn't scroll.
 **Fix:** the fit budget is the **device top** (− 14px), and blockBottom is sibling-aware — shrinking the `[data-fit]` headline must pull the whole trailing copy block clear. Floor breach = exit 2 = rewrite the copy.
 
+## Dead zone between copy and device
+
+**Symptom:** a band of empty paper between `.sub` and the device top — the panel reads as two unrelated halves (field case: short copy + the default device slot left a visible gap on a shipped-candidate set).
+**Cause:** short copy + the fixed device slot (`--device-top-ratio` reserves the same top zone whether the copy fills it or not). The shipped gold sets never show this because something always bridges the copy→device zone.
+**Fix,** in priority order:
+
+1. **Bridge the zone** — place a `.cutout`/`.chip`/`.popCard` overlapping the device's top edge so it carries the eye from copy to screen (this is what the gold sets do).
+2. **Tighten the slot** — a set-wide `--device-top-ratio` override in theme.css, sanctioned range **0.28–0.36**. It's a SET decision, never per-panel: consistency within a set is the contract; across apps it isn't.
+3. **Scale type up** — last resort only, inside the copy-contract limits (create.md: beyond ~50px/900 a two-word line force-wraps at 430px).
+
+## Eyebrow rendered as a chip/highlight
+
+**Symptom:** the eyebrow is a tiny gradient-filled or solid-background pill above the headline — unreadable noise at store-thumbnail size (field case: an agent shipped a gradient chip eyebrow that failed the thumbnail test).
+**Cause:** treating the eyebrow as a badge. Store search shows ~200px-wide thumbnails; a filled mini-chip becomes an illegible smudge that competes with the headline.
+**Fix:** the default is NO eyebrow — drop it and let the headline work. If one earns its place: plain mono text + hairline rule (the kit's `.eyebrow` exactly), nothing filled, no gradients, no backgrounds.
+
 ## Stretched screenshots in the frame
 
 **Symptom:** the in-frame app capture looks squashed or stretched.

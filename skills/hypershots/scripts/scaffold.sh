@@ -23,6 +23,7 @@ cat > "$WS/theme.css" <<'EOF'
   --badge-ink:#333333;  /* gradeBadge glyph */
   --font-sans:'Inter Tight',system-ui,sans-serif;
   --font-mono:'IBM Plex Mono',ui-monospace,monospace;
+  /* optional, set-wide: --device-top-ratio: 0.33;  sanctioned 0.28–0.36 — see gotchas.md */
 }
 EOF
 cat > "$WS/brief.md" <<'EOF'

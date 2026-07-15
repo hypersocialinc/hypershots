@@ -58,7 +58,11 @@ Required tokens (consumed by frame.css — all of them):
 --font-sans --font-mono
 ```
 
-Fonts: the kit vendors **Inter Tight** (variable 400–900, normal+italic) and **IBM Plex Mono** (400/500/600), latin + latin-ext subsets. Using other fonts requires vendoring the woff2 into the workspace with `@font-face` — **NEVER a remote `@import`**: it breaks offline determinism, races Chrome's `--virtual-time-budget`, and upstream font builds drift metrics.
+Fonts: the kit vendors **Inter Tight** (variable 400–900, normal+italic) and **IBM Plex Mono** (400/500/600), latin + latin-ext subsets. Choosing a face is a brand decision — `typography.md` has the hierarchy (mirror the app's real brand font first, else pick from the curated menu). Using other fonts requires vendoring the woff2 into the workspace with `@font-face` — **NEVER a remote `@import`**: it breaks offline determinism, races Chrome's `--virtual-time-budget`, and upstream font builds drift metrics. Vendor correctly in one command:
+
+```bash
+bash <skill>/scripts/fetch-fonts.sh <ws> "Fraunces" "600;900"   # downloads woff2 + appends @font-face to <ws>/fonts.css + fetches the OFL
+```
 
 ## 5. Author panels
 
@@ -110,7 +114,7 @@ Structure notes:
 
 **Frame contract** (frame.css is the geometric contract):
 
-- Geometry classes are IMMUTABLE: `.panel` `.stage` `.device` `.screen` `.di` `.statusbar`. Profile variables (`--panel-w`/`--panel-h`) size everything; anchors are ratios of panel size, so the same panel renders at any near-aspect iPhone profile. Type classes (`.headline` `.sub` `.eyebrow`) MAY be restyled in `theme.css` — that's the brand layer's job (fit.js measures actual boxes, so size/weight changes are safe).
+- Geometry classes are IMMUTABLE: `.panel` `.stage` `.device` `.screen` `.di` `.statusbar`. Profile variables (`--panel-w`/`--panel-h`) size everything; anchors are ratios of panel size, so the same panel renders at any near-aspect iPhone profile. Type classes (`.headline` `.sub` `.eyebrow`) MAY be restyled in `theme.css` — that's the brand layer's job (fit.js measures actual boxes, so size/weight changes are safe). ONE sanctioned geometry override: `theme.css` may set `--device-top-ratio` (default 0.330) within **0.28–0.36** — set-wide only, never per-panel (gotchas.md, "Dead zone between copy and device").
 - Never reuse a frame.css class name for a per-panel style — a collision inherits absolute positioning silently and validates cleanly. Reserved list + symptom: gotchas.md, "Reserved class names".
 - Real simulator captures go in `<img class="shot" src="../assets/capture.png">` inside `.screen`. They already contain the device's own status bar and island — **never add `.di`/`.statusbar` over a real capture** (double-Dynamic-Island bug). Use `.di` + `.statusbar` only on hand-built screens.
 - Screen aspect is ~0.460 (w/h). Captures should match; `.shot` top-anchor cover-crops (`object-fit:cover; object-position:top center`) so slightly-taller captures lose bottom pixels, not get stretched.
@@ -132,12 +136,16 @@ Structure notes:
 - `.emoji` — plain emoji glyph with drop shadow (zero-dependency sticker)
 - `.popCard` — a piece of the in-screen UI lifted out of the device as a rotated floating card (defaults wider than the device so it breaks the bezel on both sides). Two composition rules: it MUST fully cover the source region it duplicates (rotation shifts corners — check all four in the rendered PNG), and alternate the rotation sign across panels so the set doesn't feel stamped from one template.
 
+**Bridge the copy→device zone.** Short copy leaves dead paper between `.sub` and the device top — the shipped gold sets never show it because a sticker (`.cutout`/`.chip`) or `.popCard` overlaps the device's top edge and carries the eye down. On panels with short copy, author a bridging element; if paper persists, escalate per gotchas.md, "Dead zone between copy and device".
+
+**Perspective (optional):** `.device.tilt-l` / `.device.tilt-r` / `.device.lean` (frame.css) tilt the device with CSS only — geometry stays deterministic and boxes.json captures the transformed bounds. When: the hero panel of a feature-led set, at most ONE tilted panel per set. Never on capture-critical panels whose in-screen text must be read.
+
 Negative left/right offsets that bleed off the panel edge are fine — `.panel` clips. Sticker drop shadows extend beyond their boxes; the style-edit mask pads for it.
 
 **Copy contract** (field-learned — these four rules survived a shipped set):
 
 - **Outcome in the headline, mechanism in the sub.** "Find your perfect NYC apartment" / "With an AI agent that hunts every listing site for you" — the headline sells what the user gets; the differentiator is the sub's job.
-- **Eyebrows are optional.** At thumbnail size they're decoration; store visitors read headline-first. Drop the eyebrow when the headline works harder without it.
+- **Eyebrows: default is NONE, and never a chip.** Store search shows ~200px-wide thumbnails — an eyebrow is decoration there; visitors read headline-first. Drop it when the headline works harder without it. If one earns its place: plain mono text + hairline rule (the kit's `.eyebrow` exactly) — never a gradient/filled-background chip, which fails the thumbnail test (gotchas.md, "Eyebrow rendered as a chip/highlight").
 - **Headlines are exactly 2 lines, authored with `<br>`; subs exactly 1 line.** A 3-line headline or an orphan-word sub reads broken at store size — the fix is REWORDING, not resizing. Glyph width matters more than character count: "Track every home" (16 chars) overflowed where "Find your perfect" (17 chars) fit.
 - **Type scale:** kit defaults are headline 45px/800, sub 19.5px/500; field sessions landed at ~47px/900 and ~23px/600. Restyling type classes in `theme.css` is sanctioned (see Frame contract above). Beyond ~50px/900 a typical two-word line force-wraps at 430px.
 
@@ -168,6 +176,7 @@ On any per-panel failure the PNG and partial boxes.json are deleted (no orphans 
 Read every rendered PNG with the Read tool and check:
 
 - Copy overflow or awkward line breaks?
+- Dead paper between sub and device? Bridge or tighten (gotchas: dead zone).
 - Stickers clipped, overlapping copy, or covering the wrong UI?
 - `.di`/`.statusbar` stacked on a real capture (double island)?
 - Theme legible — contrast of ink on paper, accent not vibrating?

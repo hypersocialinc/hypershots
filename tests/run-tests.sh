@@ -4,7 +4,7 @@ cd "$(dirname "$0")/.."
 R=skills/hypershots/scripts/render.sh
 V=skills/hypershots/scripts/validate.sh
 WS=tests/fixture
-rm -rf "$WS/out" "$WS/profile.css" "$WS"/t11-* "$WS"/t14-*
+rm -rf "$WS/out" "$WS/profile.css" "$WS"/t11-* "$WS"/t14-* "$WS/panels-t16"
 
 echo "== T1: render at iphone-6.9 =="
 bash "$R" "$WS" iphone-6.9 en
@@ -255,5 +255,21 @@ fi
 bash "$V" "$WS" iphone-6.9 en
 rm -rf "$WS/out/iphone-6.9/en-grid"
 echo "shots dump + quarantined grid render OK"
+
+echo "== T16: perspective preset (.device.tilt-l) renders + validates =="
+mkdir -p "$WS/panels-t16"
+sed 's/class="device"/class="device tilt-l"/' "$WS/panels/panel-1.html" > "$WS/panels-t16/panel-1.html"
+grep -q 'class="device tilt-l"' "$WS/panels-t16/panel-1.html" || { echo "T16 setup FAILED: tilt-l class not injected"; exit 1; }
+bash "$R" "$WS" iphone-6.9 t16
+bash "$V" "$WS" iphone-6.9 t16
+# boxes.json must still carry the device box (transformed bounds, not a miss)
+node -e "
+  const j=require('./$WS/out/iphone-6.9/t16/panel-1.boxes.json');
+  const d=j.boxes.find(b=>b.name==='device');
+  if(!d)throw new Error('no device box in tilted render');
+  if(!(d.w>0&&d.h>0))throw new Error('degenerate device box '+JSON.stringify(d));
+  console.log('tilted device box captured ('+Math.round(d.w)+'x'+Math.round(d.h)+') OK')"
+rm -rf "$WS/panels-t16" "$WS/out/iphone-6.9/t16"
+echo "tilt-l panel rendered + validated OK"
 
 echo "ALL TESTS PASSED"
