@@ -1,5 +1,7 @@
 # HyperShots
 
+[![skills.sh](https://skills.sh/b/hypersocialinc/hypershots)](https://skills.sh/hypersocialinc/hypershots)
+
 **Beautiful App Store screenshots — perfect to spec, shipped end to end.** Deterministic HTML where Apple has rules, generative AI where it sells.
 
 **[hypershots.dev](https://hypershots.dev)**
