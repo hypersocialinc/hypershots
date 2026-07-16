@@ -49,3 +49,21 @@ magick montage burst/frame-*.png -tile 8x -geometry +2+2 burst-sheet.png
 ```
 
 **Etiquette:** gestures COMMIT at release. When driving real user data, undo every action you cause — a burst-captured swipe still archives the card. And swipe direction maps to semantics: swipe the direction whose stamp/affordance you want in the frame.
+
+## Automated capture at scale (Swift-native projects)
+
+These recipes cover bespoke marketing frames. For capturing MANY screens across
+device×locale×appearance matrices in a Swift/Xcode project, a dedicated capture
+tool beats hand-driving the simulator:
+
+- **StoreScreens** (open-source, `brew`): generates XCUITests from your Swift
+  source and runs them across simulators in parallel, per locale and light/dark —
+  https://github.com/ciscoriordan/storescreens-cli. Use its `capture` output as
+  the raw screens, then author HyperShots panels around them (its `render`
+  templates and HyperShots panels are alternatives — pick one, don't stack).
+- **fastlane snapshot**: the classic UI-test-driven capture lane; pairs naturally
+  with the fastlane-deliver setup in `fastlane-deliver.md`.
+
+React Native / Flutter / Expo projects: drive the simulator with your usual
+tooling (Maestro, Detox, or by hand with the recipes above) — capture is
+stack-specific; the panels aren't.

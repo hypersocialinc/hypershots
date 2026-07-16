@@ -17,6 +17,7 @@ App Store Connect's old **"6.7 inch"** label is the same slot as 6.9″ — one 
 
 ## Asset rules (what validate.sh enforces)
 
+- **File size:** max **8 MB** per screenshot — `validate.sh` enforces it.
 - **Format:** Apple accepts PNG or JPG; this pipeline produces and validates **PNG only** (render.sh writes .png, validate.sh globs `panel-*.png` — a stray .jpg is invisible to it).
 - **Alpha:** flattened, NO alpha channel. An RGBA PNG is rejected at upload. `render.sh` prevents it at the source (`--default-background-color=FFFFFFFF`); `validate.sh` flattens in place with ImageMagick if one slips through.
 - **ICC profile:** untagged or sRGB. Headless Chrome emits **untagged** PNGs and ASC treats untagged as sRGB — a validator that *required* an sRGB tag would fail every correct render. `validate.sh` accepts untagged (`<nil>`), `*sRGB*`, and `*IEC 61966*`; anything else fails.

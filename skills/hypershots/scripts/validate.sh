@@ -50,6 +50,9 @@ FAILED=0
 for f in "${PNGS[@]}"; do
   read -r w h a prof <<< "$(props "$f")"
   ok=1; msgs=()
+  # Apple rejects screenshots over 8 MB
+  bytes=$(wc -c < "$f" | tr -d ' ')
+  [ "$bytes" -le 8388608 ] || { ok=0; msgs+=("${bytes} bytes — over Apple's 8 MB screenshot cap; recompress or simplify the panel"); }
   [ "$w" = "$OW" ] && [ "$h" = "$OH" ] || { ok=0; msgs+=("dims ${w}x${h}, expected ${OW}x${OH}"); }
   # every PNG must carry a clean boxes.json sibling: proof the render pipeline
   # completed (fit + dim checks) for THIS file — validate is self-sufficient

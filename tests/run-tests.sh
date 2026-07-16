@@ -272,4 +272,25 @@ node -e "
 rm -rf "$WS/panels-t16" "$WS/out/iphone-6.9/t16"
 echo "tilt-l panel rendered + validated OK"
 
+echo "== T17: validator rejects a PNG over Apple's 8 MB cap =="
+# incompressible noise at target dims -> >8MB, with a clean boxes.json sibling
+OUT_EN="$WS/out/iphone-6.9/en"
+node -e "
+  const z=require('zlib'),fs=require('fs'),crypto=require('crypto');
+  const W=1290,H=2796;
+  const chunk=(t,d)=>{const l=Buffer.alloc(4);l.writeUInt32BE(d.length);
+    const c=Buffer.concat([Buffer.from(t),d]);
+    const cc=Buffer.alloc(4);cc.writeUInt32BE(z.crc32(c)>>>0);
+    return Buffer.concat([l,c,cc])};
+  const ihdr=Buffer.alloc(13);ihdr.writeUInt32BE(W,0);ihdr.writeUInt32BE(H,4);ihdr[8]=8;ihdr[9]=2;
+  const rows=[];
+  for(let y=0;y<H;y++){rows.push(Buffer.concat([Buffer.from([0]),crypto.randomBytes(W*3)]))}
+  const idat=z.deflateSync(Buffer.concat(rows),{level:0});
+  fs.writeFileSync('$OUT_EN/panel-6.png',Buffer.concat(
+    [Buffer.from([137,80,78,71,13,10,26,10]),chunk('IHDR',ihdr),chunk('IDAT',idat),chunk('IEND',Buffer.alloc(0))]));"
+printf '{"panelW":430,"panelH":932,"fitFailures":[],"boxes":[]}' > "$OUT_EN/panel-6.boxes.json"
+if bash "$V" "$WS" iphone-6.9 en; then echo "T17 FAILED: validator accepted an oversized png"; exit 1
+else echo "validator correctly rejected >8MB png"; fi
+rm -f "$OUT_EN/panel-6.png" "$OUT_EN/panel-6.boxes.json"
+
 echo "ALL TESTS PASSED"
