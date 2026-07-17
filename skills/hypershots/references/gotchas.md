@@ -42,6 +42,18 @@ Failure modes this pipeline was hardened against. Symptom → cause → fix. If 
 2. **Tighten the slot** — a set-wide `--device-top-ratio` override in theme.css, sanctioned range **0.28–0.36**. It's a SET decision, never per-panel: consistency within a set is the contract; across apps it isn't.
 3. **Scale type up** — last resort only, inside the copy-contract limits (create.md: beyond ~50px/900 a two-word line force-wraps at 430px).
 
+## Marketing copy too small for store thumbnails
+
+**Symptom:** the set looks great full-size; at store-search scale (or on the review page's store-scale strip) the subs read as gray noise. Field-reported: "some text is quite small" was the first outside feedback on an otherwise-solid set.
+**Cause:** copy authored to FIT rather than to be READ — a long sub shrunk to 13–14px so it stays on one line, or per-panel styles overriding the type scale downward.
+**Fix:** reword to fewer words at ≥15px; never shrink below the floor. render.sh prints a LEGIBILITY WARNING per breach (fit.js's `.wrap` font-size census; eyebrows exempt) and make-review flags the panel. In-device text is exempt too — it's a screenshot, small is honest.
+
+## Invented app UI in the device (App Review 2.3.3)
+
+**Symptom:** panels ship with hand-built HTML screens showing flows/data the app doesn't actually display — a rejection risk validate.sh cannot see (specs green, content fiction). Camera/AR apps hit this hardest: with no captures provided, the screen gets invented.
+**Cause:** no captures in `assets/`, and the mocked screen drifted from the real app.
+**Fix:** real captures are the rule; a hand-built screen is a bridge, marked `data-mockup="screen"` so render warns and the review page banners it until replaced. Camera apps: capture on a real device (capture-recipes.md, "Camera/AR apps") — the simulator's camera is a black feed.
+
 ## Eyebrow rendered as a chip/highlight
 
 **Symptom:** the eyebrow is a tiny gradient-filled or solid-background pill above the headline — unreadable noise at store-thumbnail size (field case: an agent shipped a gradient chip eyebrow that failed the thumbnail test).

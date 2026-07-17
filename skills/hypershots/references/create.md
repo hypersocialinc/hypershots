@@ -34,11 +34,13 @@ The installed skill dir stays read-only reference; never author or edit files th
 
 ## 3. Brief questionnaire
 
+**Harvest before you ask.** A one-prompt-no-context run misses the app's key features — field-proven failure mode. Before the questionnaire, mine what's already there: the codebase (feature modules, paywall copy, onboarding strings), the App Store listing / README / website if any. From that, draft a ranked **one-feature-per-panel plan** (panel 1 = the emotional hook, see Narrative arc below) and put it IN the questionnaire message for the user to confirm, reorder, or veto. Thirty seconds of confirmation beats three revision rounds on missed features.
+
 Ask the user in ONE message, mirroring the scaffolded `brief.md` fields:
 
 1. App name / one-line positioning
-2. Captures provided (files to drop in `assets/`)
-3. Panel count + per-panel headline & sub
+2. Captures provided (files to drop in `assets/`) — **if the app's core surface is the camera/AR/live video, real captures are effectively required; see the mockup policy in step 5**
+3. Panel plan — your harvested proposal: N panels, per-panel feature + headline & sub
 4. Stickers / generated assets wanted (or none)
 5. Device profile(s) — default `iphone-6.9`
 6. Locales — default `en`
@@ -94,7 +96,8 @@ Write `<ws>/panels/panel-1.html` … `panel-N.html`. Bespoke HTML per app — th
            status bar + Dynamic Island -->
       <img class="shot" src="../assets/capture-1.png">
       <!-- HAND-BUILT screen instead: replace .shot with your markup PLUS these
-           two (never combine them with a real capture):
+           two (never combine them with a real capture), and mark the built
+           region data-mockup="screen" — see the mockup policy below:
       <div class="di"></div>
       <div class="statusbar"><span class="time">9:41</span><span class="icons"></span></div>
       -->
@@ -117,6 +120,7 @@ Structure notes:
 - Geometry classes are IMMUTABLE: `.panel` `.stage` `.device` `.screen` `.di` `.statusbar`. Profile variables (`--panel-w`/`--panel-h`) size everything; anchors are ratios of panel size, so the same panel renders at any near-aspect iPhone profile. Type classes (`.headline` `.sub` `.eyebrow`) MAY be restyled in `theme.css` — that's the brand layer's job (fit.js measures actual boxes, so size/weight changes are safe). ONE sanctioned geometry override: `theme.css` may set `--device-top-ratio` (default 0.330) within **0.28–0.36** — set-wide only, never per-panel (gotchas.md, "Dead zone between copy and device").
 - Never reuse a frame.css class name for a per-panel style — a collision inherits absolute positioning silently and validates cleanly. Reserved list + symptom: gotchas.md, "Reserved class names".
 - Real simulator captures go in `<img class="shot" src="../assets/capture.png">` inside `.screen`. They already contain the device's own status bar and island — **never add `.di`/`.statusbar` over a real capture** (double-Dynamic-Island bug). Use `.di` + `.statusbar` only on hand-built screens.
+- **Mockup policy (App Review 2.3.3).** Screenshots must reflect the app in actual use — real captures are the rule, hand-built screens the exception. When you do build a screen in HTML (no captures provided yet, or a state that can't be staged), mark the built region `data-mockup="screen"`: render.sh prints a warning per mockup panel and the review page banners it *replace with real capture (2.3.3)*. A mocked screen must reproduce the REAL app UI (from captures/recordings of other states, the codebase's actual copy and layout) — never invent features or data the app doesn't show. Camera/AR/live-video apps: the store set needs real captured content in the device; get captures per `capture-recipes.md` (camera apps section) before submission — a fabricated camera view is a rejection risk no validator can see.
 - Screen aspect is ~0.460 (w/h). Captures should match; `.shot` top-anchor cover-crops (`object-fit:cover; object-position:top center`) so slightly-taller captures lose bottom pixels, not get stretched.
 
 **Marker rules** (create-time discipline that makes translate and style-edit mechanical later — full contract in `i18n.md`):
@@ -148,6 +152,7 @@ Negative left/right offsets that bleed off the panel edge are fine — `.panel` 
 - **Eyebrows: default is NONE, and never a chip.** Store search shows ~200px-wide thumbnails — an eyebrow is decoration there; visitors read headline-first. Drop it when the headline works harder without it. If one earns its place: plain mono text + hairline rule (the kit's `.eyebrow` exactly) — never a gradient/filled-background chip, which fails the thumbnail test (gotchas.md, "Eyebrow rendered as a chip/highlight").
 - **Headlines are exactly 2 lines, authored with `<br>`; subs exactly 1 line.** A 3-line headline or an orphan-word sub reads broken at store size — the fix is REWORDING, not resizing. Glyph width matters more than character count: "Track every home" (16 chars) overflowed where "Find your perfect" (17 chars) fit.
 - **Type scale:** kit defaults are headline 45px/800, sub 19.5px/500; field sessions landed at ~47px/900 and ~23px/600. Restyling type classes in `theme.css` is sanctioned (see Frame contract above). Beyond ~50px/900 a typical two-word line force-wraps at 430px.
+- **Legibility floor: no marketing copy below 15px CSS** (eyebrows exempt — they're decoration by contract). Store search shows the panel at roughly 1/6 scale; 14px copy is noise there. fit.js dumps a font-size census of `.wrap`, render.sh warns on breaches, and the review page flags the panel + shows a store-scale thumbnail strip. The fix is FEWER WORDS at a legible size, not more words smaller — if a sub needs 14px to fit on one line, reword it (field-reported: "some text is quite small" was the first thing a founder's friend said about an otherwise-solid set).
 
 **Narrative arc** (from the shipped Spotless set): shock/hook → map/core value → trust/data-source → share/delight → bonus. The FIRST 3 panels are all most visitors see (see `store-specs.md`) — they carry the install decision. Lead with the emotional hook, not the feature list.
 
@@ -181,6 +186,7 @@ Read every rendered PNG with the Read tool and check:
 - `.di`/`.statusbar` stacked on a real capture (double island)?
 - Theme legible — contrast of ink on paper, accent not vibrating?
 - Screenshot inside the frame stretched or mis-cropped?
+- **Thumbnail test**: imagine the panel at 1/6 size (the review page renders this strip for you) — is every word of marketing copy still readable? Did render.sh print LEGIBILITY or MOCKUP warnings you haven't resolved?
 
 Fix panels/theme → re-render → re-Read. Loop until clean. **Never skip this** — the validator checks specs, not taste; only your eyes catch a clipped sticker.
 
@@ -198,7 +204,7 @@ Checks: exact dims for the profile; ≤10 panels; no alpha (flattens in place if
 node <skill>/scripts/make-review.mjs <ws> iphone-6.9    # locales default to all rendered
 ```
 
-Writes `out/<profile>/review.html` — an App Store-style gallery strip (locale tabs, fold line after panel 3, headline captions, clean/styled toggle). Open it / show it to the user for sign-off; feedback arrives by panel number. If your runtime can publish an HTML artifact (e.g. Claude Code's Artifact tool), publish a copy with images downscaled to ~600px and inlined as data URIs (artifact sandboxes block local file paths); otherwise the local file is the review surface.
+Writes `out/<profile>/review.html` — an App Store-style gallery strip (locale tabs, fold line after panel 3, headline captions, clean/styled toggle, a store-scale thumbnail strip per locale, and QA flags per panel: legibility-floor breaches and unresolved `data-mockup` screens). Open it / show it to the user for sign-off; feedback arrives by panel number. If your runtime can publish an HTML artifact (e.g. Claude Code's Artifact tool), publish a copy with images downscaled to ~600px and inlined as data URIs (artifact sandboxes block local file paths); otherwise the local file is the review surface.
 
 The contact sheet remains the quick-share secondary artifact:
 

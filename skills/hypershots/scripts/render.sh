@@ -74,6 +74,10 @@ for f in "${PANELS[@]}"; do
         const j=JSON.parse(m[1]);
         if(j.panelW!==expW||j.panelH!==expH){console.error(`ERROR: panel is ${j.panelW}x${j.panelH} but profile expects ${expW}x${expH} — is profile.css linked?`);process.exit(3)}
         if(j.fitFailures.length){console.error("FIT FAILURE (copy needs a rewrite): "+j.fitFailures.join(", "));process.exit(2)}
+        // warnings, never failures: taste calls belong to the review loop
+        const small=(j.copy||[]).filter(c=>c.px<15);
+        if(small.length)console.error("LEGIBILITY WARNING: copy under 15px reads as noise at store-thumbnail scale — "+small.map(c=>c.name+" "+c.px+"px").join(", ")+" (reword or restyle, see create.md copy contract)");
+        if((j.mockups||[]).length)console.error("MOCKUP UI: hand-built screen content ["+j.mockups.map(m=>m.name).join(", ")+"] — replace with real captures before submission (App Review 2.3.3)");
         console.log(JSON.stringify(j,null,1));})' "$W" "$H" > "$TMP" || rc=$?
   if [ "$rc" -ne 0 ]; then
     rm -f "$OUT/$n.png" "$TMP"      # no orphan PNG, no partial boxes.json

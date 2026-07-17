@@ -4,7 +4,7 @@ cd "$(dirname "$0")/.."
 R=skills/hypershots/scripts/render.sh
 V=skills/hypershots/scripts/validate.sh
 WS=tests/fixture
-rm -rf "$WS/out" "$WS/profile.css" "$WS"/t11-* "$WS"/t14-* "$WS/panels-t16"
+rm -rf "$WS/out" "$WS/profile.css" "$WS"/t11-* "$WS"/t14-* "$WS"/t18-* "$WS/panels-t16" "$WS/panels-t18"
 
 echo "== T1: render at iphone-6.9 =="
 bash "$R" "$WS" iphone-6.9 en
@@ -292,5 +292,32 @@ printf '{"panelW":430,"panelH":932,"fitFailures":[],"boxes":[]}' > "$OUT_EN/pane
 if bash "$V" "$WS" iphone-6.9 en; then echo "T17 FAILED: validator accepted an oversized png"; exit 1
 else echo "validator correctly rejected >8MB png"; fi
 rm -f "$OUT_EN/panel-6.png" "$OUT_EN/panel-6.boxes.json"
+
+echo "== T18: legibility census + mockup flags (fit.js -> render warnings -> review) =="
+mkdir -p "$WS/panels-t18"
+sed -e 's/class="sub"/class="sub" style="font-size:13px"/' \
+    -e 's/<div style="position:absolute;inset:0/<div data-mockup="screen" style="position:absolute;inset:0/' \
+    "$WS/panels/panel-1.html" > "$WS/panels-t18/panel-1.html"
+grep -q 'data-mockup="screen"' "$WS/panels-t18/panel-1.html" || { echo "T18 setup FAILED: mockup attr not injected"; exit 1; }
+rc=0; bash "$R" "$WS" iphone-6.9 t18 2>"$WS/t18-err.txt" || rc=$?
+[ "$rc" -eq 0 ] || { echo "T18 FAILED: warnings must not fail the render (exit $rc):"; cat "$WS/t18-err.txt"; exit 1; }
+grep -q "LEGIBILITY WARNING" "$WS/t18-err.txt" || { echo "T18 FAILED: no legibility warning for 13px sub:"; cat "$WS/t18-err.txt"; exit 1; }
+grep -q "MOCKUP UI" "$WS/t18-err.txt" || { echo "T18 FAILED: no mockup warning for data-mockup screen:"; cat "$WS/t18-err.txt"; exit 1; }
+node -e "
+  const j=require('./$WS/out/iphone-6.9/t18/panel-1.boxes.json');
+  if(!Array.isArray(j.copy)||!j.copy.length)throw new Error('no copy census in boxes.json');
+  const sub=j.copy.find(c=>c.name==='p1.sub');
+  if(!sub||sub.px>=15)throw new Error('13px sub not in census: '+JSON.stringify(j.copy));
+  if(j.copy.find(c=>c.name==='p1.eyebrow'))throw new Error('eyebrow must be exempt from the census');
+  if(!Array.isArray(j.mockups)||j.mockups.length!==1)throw new Error('expected 1 mockup box, got '+JSON.stringify(j.mockups));
+  if(!(j.mockups[0].w>0&&j.mockups[0].h>0))throw new Error('degenerate mockup box');
+  console.log('copy census + mockup box in dump OK')"
+node skills/hypershots/scripts/make-review.mjs "$WS" iphone-6.9 t18 >/dev/null
+review18="$WS/out/iphone-6.9/review.html"
+grep -q "store-scale check" "$review18" || { echo "T18 FAILED: store-scale strip missing from review"; exit 1; }
+grep -q "legibility floor" "$review18" || { echo "T18 FAILED: legibility flag missing from review"; exit 1; }
+grep -q "mockup UI" "$review18" || { echo "T18 FAILED: mockup banner missing from review"; exit 1; }
+rm -rf "$WS/panels-t18" "$WS/out/iphone-6.9/t18" "$WS/t18-err.txt" "$review18"
+echo "legibility + mockup QA wired end to end OK"
 
 echo "ALL TESTS PASSED"

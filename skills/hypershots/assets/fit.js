@@ -2,9 +2,11 @@
    <script src="fit.js"></script>
    Contract: [data-fit] on shrinkable copy blocks (optional data-fit-floor, px);
    [data-protect="name"] on regions the style-edit must preserve.
-   Dump shape: { panelW, panelH, fitFailures, boxes, shots } — boxes are the
-   [data-protect] regions (mask input), shots are the .shot capture regions
-   (coordinate reference only, never masked). */
+   Dump shape: { panelW, panelH, fitFailures, boxes, shots, copy, mockups } —
+   boxes are the [data-protect] regions (mask input), shots are the .shot
+   capture regions (coordinate reference only, never masked), copy is the
+   marketing-copy font-size census (legibility QA), mockups are [data-mockup]
+   hand-built screen regions (real-capture QA). */
 (async () => {
   await document.fonts.ready;
   const root = document.documentElement;
@@ -45,6 +47,22 @@
     const r = el.getBoundingClientRect();
     return { name: 'shot', x: r.x, y: r.y, w: r.width, h: r.height };
   });
+  // marketing-copy census: every text-bearing element in .wrap, except the
+  // eyebrow (sanctioned-small decoration). The legibility judgement lives
+  // downstream (render.sh warns, make-review flags) — fit.js only measures.
+  const copy = [...document.querySelectorAll('.wrap *')]
+    .filter(el => !el.closest('.eyebrow'))
+    .filter(el => [...el.childNodes].some(n =>
+      n.nodeType === 3 && n.textContent.trim().length >= 3))
+    .map(el => ({ name: el.dataset.i18n || el.className || el.tagName.toLowerCase(),
+                  px: Math.round(parseFloat(getComputedStyle(el).fontSize) * 10) / 10 }));
+  // mockup census: hand-built in-device UI marked data-mockup (App Review
+  // 2.3.3 wants real app content). Boxes make invented UI impossible to ship
+  // silently — render.sh warns, the review page banners the panel.
+  const mockups = [...document.querySelectorAll('[data-mockup]')].map(el => {
+    const r = el.getBoundingClientRect();
+    return { name: el.dataset.mockup || 'mockup', x: r.x, y: r.y, w: r.width, h: r.height };
+  });
   // debug grid: render.sh --grid sets --hs-grid:1 in the generated profile.css.
   // 50px CSS-space lines + labeled coordinates every 100px, drawn over the
   // panel (z-index 90, no layout impact — absolute + pointer-events:none).
@@ -72,6 +90,6 @@
   const dump = document.createElement('script');
   dump.type = 'application/json';
   dump.id = 'hypershots-boxes';
-  dump.textContent = JSON.stringify({ panelW, panelH, fitFailures: failures, boxes, shots });
+  dump.textContent = JSON.stringify({ panelW, panelH, fitFailures: failures, boxes, shots, copy, mockups });
   document.body.appendChild(dump);
 })();

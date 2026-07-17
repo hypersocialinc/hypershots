@@ -47,6 +47,16 @@ function headline(locale, n) {
   } catch { return null; }
 }
 
+// QA flags from the render's boxes.json: marketing copy under the legibility
+// floor, and data-mockup (hand-built screen) regions. Best-effort — old
+// renders without the keys just produce no flags.
+function qa(locale, n) {
+  try {
+    const j = JSON.parse(readFileSync(join(profileDir, locale, `panel-${n}.boxes.json`), 'utf8'));
+    return { small: (j.copy || []).filter(c => c.px < 15), mockups: j.mockups || [] };
+  } catch { return { small: [], mockups: [] }; }
+}
+
 const sections = locales.map(locale => {
   const dir = join(profileDir, locale);
   if (!existsSync(dir)) die(`locale dir not found: ${dir}`);
@@ -61,15 +71,25 @@ const sections = locales.map(locale => {
     const clean = `${locale}/panel-${n}.png`;
     const styledAttr = styled.has(n) ? ` data-styled="${esc(`${locale}/panel-${n}.styled.png`)}"` : '';
     const cap = headline(locale, n);
+    const { small, mockups } = qa(locale, n);
+    const flags = [
+      mockups.length ? `<em class="mock">mockup UI — replace with real capture (2.3.3)</em>` : '',
+      ...small.map(c => `<em class="warn">${esc(c.name)} ${c.px}px — below the 15px legibility floor</em>`),
+    ].filter(Boolean).join('');
     // Apple shows ~3 portrait shots before "Show All" — mark the fold after
     // panel 3 (or after the last panel when the whole set fits pre-fold).
     const fold = i === Math.min(2, panels.length - 1)
       ? `\n      <div class="fold"><span>visible before &ldquo;Show All&rdquo;</span></div>` : '';
     return `      <figure>
         <img src="${esc(clean)}" data-clean="${esc(clean)}"${styledAttr} alt="panel ${n} (${esc(locale)})">
-        <figcaption><b>panel ${n}</b>${cap ? `<span>${esc(cap)}</span>` : ''}</figcaption>
+        <figcaption><b>panel ${n}</b>${cap ? `<span>${esc(cap)}</span>` : ''}${flags}</figcaption>
       </figure>${fold}`;
   }).join('\n');
+
+  // store-scale strip: the same set at search-result size. The legibility
+  // test is visual — if copy can't be read here, visitors never read it.
+  const thumbs = panels.map(n =>
+    `<img src="${esc(`${locale}/panel-${n}.png`)}" alt="panel ${n} thumbnail">`).join('\n      ');
 
   const toggle = styled.size ? `
     <div class="styled-toggle" role="group" aria-label="variant">
@@ -81,6 +101,11 @@ const sections = locales.map(locale => {
     <div class="meta"><h2>${esc(locale)}</h2>${toggle}</div>
     <div class="strip">
 ${cards}
+    </div>
+    <div class="thumbcheck">
+      <h3>store-scale check</h3>
+      <p>Search-result size. Anything you can't read here, visitors never read.</p>
+      ${thumbs}
     </div>
   </section>`;
 }).join('\n');
@@ -115,6 +140,17 @@ const html = `<!doctype html>
   figcaption{ max-width:240px; padding:10px 4px 0; font-size:13px }
   figcaption b{ display:block; color:var(--mid); font-weight:600 }
   figcaption span{ color:var(--ink) }
+  figcaption em{ display:block; font-style:normal; font-size:12px; margin-top:6px;
+    padding:3px 8px; border-radius:6px; width:fit-content }
+  figcaption em.warn{ color:#ffd60a; background:rgba(255,214,10,.12) }
+  figcaption em.mock{ color:#ff453a; background:rgba(255,69,58,.14); font-weight:600 }
+  .thumbcheck{ margin:6px 0 14px; padding:14px 16px; background:var(--card);
+    border:1px solid var(--rule); border-radius:14px }
+  .thumbcheck h3{ font-size:12px; font-weight:600; letter-spacing:1.5px;
+    text-transform:uppercase; color:var(--mid) }
+  .thumbcheck p{ font-size:12px; color:var(--mid); margin:2px 0 10px }
+  .thumbcheck img{ height:150px; width:auto; border-radius:8px; margin-right:8px;
+    background:var(--bg) }
   .fold{ flex:none; align-self:stretch; display:flex; align-items:center;
     border-left:2px dashed var(--rule); padding-left:8px }
   .fold span{ writing-mode:vertical-rl; font-size:11px; letter-spacing:1px;

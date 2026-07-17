@@ -50,6 +50,21 @@ magick montage burst/frame-*.png -tile 8x -geometry +2+2 burst-sheet.png
 
 **Etiquette:** gestures COMMIT at release. When driving real user data, undo every action you cause — a burst-captured swipe still archives the card. And swipe direction maps to semantics: swipe the direction whose stamp/affordance you want in the frame.
 
+## Camera/AR apps — capture on a real device
+
+The simulator's camera is a black feed, so any app whose core surface is the camera (workout form tracking, AR, scanning) cannot be captured with simctl — and App Review 2.3.3 means the store set needs REAL camera content in the device, not an invented screen (see gotchas.md, "Invented app UI in the device").
+
+- **Stills:** hardware screenshot on the device (Side + Volume Up), AirDrop to the Mac. Fastest path, real status bar included.
+- **Mid-action frames** (the money shots for camera apps): cable the iPhone to the Mac → QuickTime Player → File → New Movie Recording → pick the iPhone as the camera source. This mirrors the device screen (QuickTime even fakes a clean 9:41 status bar in this mode). Record the whole workout/scan, then pull the exact frame:
+
+```bash
+ffmpeg -i recording.mov -vf "select='eq(n,412)'" -vframes 1 frame.png   # or:
+magick recording.mov[412] frame.png
+```
+
+- **Status bar caveat:** `simctl status_bar` doesn't exist for real devices. QuickTime's mirror mode gives you the clean bar for free; hardware screenshots keep the real one — consistent real bars across a set beat a mix.
+- Drop the chosen frames in `<ws>/assets/` and use them as ordinary `.shot` captures. Until real captures exist, any hand-built stand-in screen must carry `data-mockup="screen"` (create.md, mockup policy).
+
 ## Automated capture at scale (Swift-native projects)
 
 These recipes cover bespoke marketing frames. For capturing MANY screens across
