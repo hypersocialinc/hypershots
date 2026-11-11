@@ -4,7 +4,7 @@ permissions:
   contents: read
 jobs:
   skills:
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-4vcpu-ubuntu-2404
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -12,7 +12,7 @@ jobs:
       - run: npm ci
       - run: npm run validate
   render:
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-4vcpu-ubuntu-2404
     steps:
       - uses: actions/checkout@v4
       - uses: browser-actions/setup-chrome@v1
